@@ -1,0 +1,590 @@
+openapi: 3.0.1
+info:
+  title: Edison data service
+  description: Data-service is a transport layer to private edison blockchain
+  version: '1.0'
+servers:
+  - url: 'http://hlf-data-service.edison.digitalhorizon.ru/'
+  - url: 'http://localhost:3003/'
+paths:
+  /accounts/{accountNumber}:
+    get:
+      summary: Get complex information by account ID
+      description: Get complex information by account ID
+      parameters:
+        - in: path
+          name: accountNumber
+          example: '9060856'
+          schema:
+            type: string
+          required: true
+          description: Account number
+      tags:
+        - Accounts
+      responses:
+        '200':
+          description: Complex account info
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+              examples: {}
+  /accounts/acceptOffer:
+    post:
+      summary: Accept offer
+      description: Accept offer
+      tags:
+        - Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                id: 6930
+                message_type: accept_offer
+                received_at: '2019-10-23T08:02:11.769Z'
+                data_provider: customer-back-end service
+                version: 1
+                billing_account: '9060856'
+                counters:
+                  - 011507100128584
+                snapshot: null
+                payload:
+                  billing_account: '9060856'
+                  accepted: true
+                  timestamp: 1571817731
+      responses:
+        '200':
+          description: Created transaction object
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+  /accounts/billingBalanceUpdate:
+    post:
+      summary: Billing balance update transaction
+      description: Billing balance update transaction
+      tags:
+        - Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                id: 6931
+                message_type: billing_balance_update
+                received_at: '2019-10-23T08:56:48.957Z'
+                data_provider: customer-back-end service
+                version: 1
+                billing_account: '9060856'
+                counters:
+                  - 011507100128584
+                snapshot: null
+                payload:
+                  customer_id: 96
+                  balance:
+                    - code: 1
+                      sum: 104580
+                    - code: 7
+                      sum: 0
+                    - code: 3
+                      sum: 0
+                    - code: 8
+                      sum: 0
+                    - code: 9
+                      sum: 0
+                    - code: 4
+                      sum: 0
+                    - code: 5
+                      sum: 0
+                    - code: 6
+                      sum: 0
+                    - code: 2
+                      sum: 0
+                    - code: 10
+                      sum: 0
+                    - code: 11
+                      sum: 0
+                    - code: 12
+                      sum: 0
+                
+      responses:
+        '200':
+          description: Created transaction object
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+  /accounts/billingAccountUpdate:
+    post:
+      summary: Billing account update transaction
+      description: Billing account update transaction
+      tags:
+        - Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                id: 4656
+                message_type: billing_account_update
+                received_at: '2019-10-20T10:54:11.315Z'
+                data_provider: api.yantarenergosbyt.ru/?bank
+                version: 1
+                billing_account: '9060856'
+                counters:
+                  - 011507100128584
+                snapshot: 1012
+                payload:
+                  account: '9060856'
+                  fullName: Бердовская Людмила Владиславовна
+                  address: 'Багратионовский участок, р-н Багратионовский, г Багратионовск, ул Т.Шевченко, д.72'
+                  ls_blocked: false
+                  payments:
+                    - order: 1
+                      code: 1
+                      name: Электроэнергия
+                      sum: 202440
+                    - order: 2
+                      code: 7
+                      name: Электроэнергия ОДН
+                      sum: 0
+                    - order: 3
+                      code: 3
+                      name: Услуги
+                      sum: 0
+                    - order: 4
+                      code: 8
+                      name: Откл./подкл. (без НДС) СЕТИ
+                      sum: 0
+                    - order: 5
+                      code: 9
+                      name: Откл./подкл. (с НДС) СБЫТ
+                      sum: 0
+                    - order: 6
+                      code: 4
+                      name: Госпошлина
+                      sum: 0
+                    - order: 7
+                      code: 5
+                      name: Судебный приказ
+                      sum: 0
+                    - order: 8
+                      code: 6
+                      name: Исполнительный лист
+                      sum: 0
+                    - order: 9
+                      code: 2
+                      name: По акту
+                      sum: 0
+                    - order: 10
+                      code: 10
+                      name: Пеня
+                      sum: 0
+                    - order: 11
+                      code: 11
+                      name: '% за пользование ден. средствами'
+                      sum: 0
+                    - order: 12
+                      code: 12
+                      name: Цессия
+                      sum: 0
+                  counters:
+                    - rowID: 788748
+                      oldValueDate: '2019-09-24'
+                      tariffType: 1
+                      tariffCode: 0
+                      tariffName: Однотарифный
+                      counterNumber: '011506101735030'
+                      serviceNumber: '0100'
+                      counterLength: 6
+                      maxValue: 3500
+                      oldValue: 39950
+      responses:
+        '200':
+          description: Created transaction object
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+  /accounts/billingPaymentUpdate:
+    post:
+      summary: Billing account update transaction
+      description: Billing account update transaction
+      tags:
+        - Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+               id: 4657
+               message_type: billing_payment_update
+               received_at: '2019-10-20T10:54:11.328Z'
+               data_provider: api.yantarenergosbyt.ru/?bank
+               version: 1
+               billing_account: '9060856'
+               counters:
+                 - 011507100128584
+               snapshot: 1012
+               payload:
+                 date: '2019-09-16'
+                 source: 'Багратионовск, касса № 1'
+                 sum: 174288
+      responses:
+        '200':
+          description: Created transaction object
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+  /accounts/billingMeterDeviceUpdate:
+    post:
+      summary: Billing meter device update transaction
+      description: Billing meter device update transaction
+      tags:
+        - Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+               id: 4669
+               message_type: billing_meter_device_update
+               received_at: '2019-10-20T10:54:11.554Z'
+               data_provider: api.yantarenergosbyt.ru/?bank
+               version: 1
+               billing_account: '9060856'
+               counters:
+                 - 011507100128584
+               snapshot: 1012
+               payload:
+                 date: '2018-10-25'
+                 value: 28216
+                 consumption: 665
+
+      responses:
+        '200':
+          description: Created transaction object
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+  /accounts/telescopeValue:
+    post:
+      summary: Post telescope value
+      description: Post telescope value
+      tags:
+        - Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+               id: 2350
+               message_type: telescope_value
+               received_at: '2019-10-20T10:36:23.402Z'
+               data_provider: 'telescope.yantarenergo.ru:8020/v1/'
+               version: 1
+               billing_account: null
+               counters: []
+               snapshot: null
+               payload:
+                 id: 374874
+                 device_id: '011506101735030'
+                 ts_UTC: 1530396000
+                 value: 26406921.048
+      responses:
+        '200':
+          description: Created transaction object
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+  /accounts/bankAcquiringPayment:
+    post:
+      summary: Bank acquiring payment transaction
+      description: Bank acquiring payment transaction
+      tags:
+        - Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+               id: 7229
+               message_type: bank_acquiring_payment
+               received_at: '2019-10-20T09:52:18.073Z'
+               data_provider: Payguide™ Acquirer 2 ГПБ (АО)
+               version: 1
+               billing_account: '9060856'
+               counters:
+                 - '011506101735030'
+               snapshot: null
+               payload:
+                 ls: '9060856'
+                 customer_id: 96
+                 payment_id: 150
+                 sum: 64525
+                 fee: 0
+                 trx_id: 3803C085ED8925A77DB2DD00A5EB6F30
+                 result_code: 1
+                 currency: '643'
+                 exponent: 2
+                 signature: |-
+                   Ms8HyULQSV2eDqtQKCOe/AX71sWrFDiOm5v+3IkqAzG10YkX5y8OCwQ5cRb7TiitzYWksly+cYTx
+                   azSzZxOpoV1regP67PeAhDCyUvrRjrf3V+uyDobl4YGiYrG8J0TOCKrJ2QftHRi4sBZ/1a8IJ4x0
+                   gGIgiVKmRg6fKT+w1XB6U/J7Cpxq7ps9UgHo6hGg8Me0VqPwwBixI3HIoOgM/xUy1IP4EWhto29L
+                   FhHVC5IJXsMW6vyJbRSLsH/1K29jp10tIK7ymViPwVtqPaqKyoTsS8KafwA5vLSK9fabAFj5kcUf
+                   UJFHhRwOrUb2EZaostLBVkb1JSWqaxVNl97Gng==
+                 source: Payguide™ Acquirer 2 ГПБ (АО)
+                 transaction_type: Payment
+      responses:
+        '200':
+          description: Created transaction object
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+  /bills/generateBill:
+    post:
+      summary: Create PDF Bill (for data provider)
+      description: Create PDF Bill (requesting from provider)
+      tags:
+        - Bills
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                accountNumber:
+                  description: Target account number
+                  type: string
+                balance:
+                  description: Current account balance
+                  type: number
+                currentValue:
+                  description: Current meter device value
+                  type: integer
+                prevValue:
+                  description: Previous meter device value
+                  type: integer
+              example:
+                id: 6932
+                message_type: calc_order_contract
+                received_at: '2019-10-23T08:57:54.262Z'
+                data_provider: Edison customer backend
+                version: 1
+                billing_account: '9060856'
+                counters:
+                  - 011507100128584
+                snapshot: null
+                payload:
+                  id: 683
+                  customer: 96
+                  device_values:
+                    - device_id: 011507100128584
+                      tariff_code: 0
+                      tariff_type: 1
+                      tariff_name: \u041e\u0434\u043d\u043e\u0442\u0430\u0440\u0438\u0444\u043d\u044b\u0439
+                      last_paid_value: 11882000
+                      current_value: 11931523
+                  old_balance_state:
+                    - code: 1
+                      order: 1
+                      sum: 104580
+                      name: \u042d\u043b\u0435\u043a\u0442\u0440\u043e\u044d\u043d\u0435\u0440\u0433\u0438\u044f
+                    - code: 2
+                      order: 9
+                      sum: 0
+                      name: \u041f\u043e \u0430\u043a\u0442\u0443
+                    - code: 3
+                      order: 3
+                      sum: 0
+                      name: \u0423\u0441\u043b\u0443\u0433\u0438
+                    - code: 4
+                      order: 6
+                      sum: 0
+                      name: \u0413\u043e\u0441\u043f\u043e\u0448\u043b\u0438\u043d\u0430
+                    - code: 5
+                      order: 7
+                      sum: 0
+                      name: \u0421\u0443\u0434\u0435\u0431\u043d\u044b\u0439 \u043f\u0440\u0438\u043a\u0430\u0437
+                    - code: 6
+                      order: 8
+                      sum: 0
+                      name: \u0418\u0441\u043f\u043e\u043b\u043d\u0438\u0442\u0435\u043b\u044c\u043d\u044b\u0439 \u043b\u0438\u0441\u0442
+                    - code: 7
+                      order: 2
+                      sum: 0
+                      name: \u042d\u043b\u0435\u043a\u0442\u0440\u043e\u044d\u043d\u0435\u0440\u0433\u0438\u044f \u041e\u0414\u041d
+                    - code: 8
+                      order: 4
+                      sum: 0
+                      name: \u041e\u0442\u043a\u043b./\u043f\u043e\u0434\u043a\u043b. (\u0431\u0435\u0437 \u041d\u0414\u0421) \u0421\u0415\u0422\u0418
+                    - code: 9
+                      order: 5
+                      sum: 0
+                      name: \u041e\u0442\u043a\u043b./\u043f\u043e\u0434\u043a\u043b. (\u0441 \u041d\u0414\u0421) \u0421\u0411\u042b\u0422
+                    - code: 10
+                      order: 10
+                      sum: 0
+                      name: \u041f\u0435\u043d\u044f
+                    - code: 11
+                      order: 11
+                      sum: 0
+                      name: '% \u0437\u0430 \u043f\u043e\u043b\u044c\u0437\u043e\u0432\u0430\u043d\u0438\u0435 \u0434\u0435\u043d. \u0441\u0440\u0435\u0434\u0441\u0442\u0432\u0430\u043c\u0438'
+                    - code: 12
+                      order: 12
+                      sum: 0
+                      name: \u0426\u0435\u0441\u0441\u0438\u044f
+      responses:
+        '200':
+          description: Created transaction object
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+  /transactions/{transactionId}:
+    get:
+      summary: Get transaction data
+      description: Get transaction data
+      parameters:
+        - in: path
+          name: transactionId
+          example: 'b0c4a252ecb908548aff2a94cfb7bc439ca000040f5566b241c9dfca80d00448'
+          schema:
+            type: string
+          required: true
+          description: Transaction ID
+      tags:
+        - Transactions
+      responses:
+        '200':
+          description: Transaction object
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+              examples: {}
+  /transactions/history/{key}:
+    get:
+      summary: Get history by key
+      description: Get history by key
+      parameters:
+        - in: path
+          name: key
+          example: 'settings'
+          schema:
+            type: string
+          required: true
+          description: State db key for getting history
+      tags:
+        - Transactions
+      responses:
+        '200':
+          description: Array of state objects
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+              examples: {}
+  /transactions/stressTest:
+    post:
+      summary: Send any amount custom transactions
+      description: Send any amount custom transactions
+      tags:
+        - Transactions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                amount:
+                  description: Amount of transactions
+                  type: number
+                queue:
+                  type: string
+                  description: Target rabbitMQ queue name
+                rabbitMessage:
+                  type: string
+                  description: Rabbit message
+              example:
+                amount: 1000
+                queue: hlf_blockchain
+                target: 'peer'
+                rabbitMessage:
+                  id: 2350
+                  message_type: telescope_value
+                  received_at: '2019-10-20T10:36:23.402Z'
+                  data_provider: 'telescope.yantarenergo.ru:8020/v1/'
+                  version: 1
+                  billing_account: null
+                  counters: []
+                  snapshot: null
+                  payload:
+                    id: 374874
+                    device_id: '011506101735030'
+                    ts_UTC: 1530396000
+                    value: 26406921.048
+                  notTransmit: true
+                
+      responses:
+        '200':
+          description: Error
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+              examples: {}
+  /settings/:
+    post:
+      summary: Set system and blockchain options
+      description: Write settings entry
+      tags:
+        - Settings
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              example:
+                dataServiceURL: 'http://hlf-data-service.edison.digitalhorizon.ru'
+                telescopeToken: 'security token'
+                tariffs:
+                  - formula: '4.20'
+                    id: 0
+                    name: Однотарифный
+                  - formula: 4.15+0.05
+                    id: 1
+                    name: Двуътарифный
+                  - formula: 1.95+2.40+0.05
+                    id: 2
+                    name: Трехтарифный
+      responses:
+        '200':
+          description: Created transaction object
+          content:
+            application/json; charset=utf-8:
+              schema:
+                type: object
+              examples: {}
