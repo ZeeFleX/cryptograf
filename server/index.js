@@ -14,7 +14,8 @@ const {
 const {
   AccountsRouter,
   IndicatorsRouter,
-  CandlesRouter
+  CandlesRouter,
+  OrdersRouter
 } = require("./routers");
 const CandlesRepo = require("./repositories/candles.repo");
 const Binance = require("./services/binance.service");
@@ -23,7 +24,14 @@ const app = express();
 if (process.env.NODE_ENV === "development") app.use(cors());
 let swaggerFile = path.join(__dirname, "docs/openapi.yml");
 
-CandlesRepo.sync();
+CandlesRepo.sync([
+  "ETHUSDT",
+  "BNBUSDT",
+  "BTCUSDT",
+  "BNBETH",
+  "ETHBTC",
+  "BNBBTC"
+]);
 // setTimeout(() => {
 //   Binance.candlesSubscribe("ETHBTC");
 // }, 1000);
@@ -58,6 +66,8 @@ app.use(express.static(`public`));
 app.use("/accounts", AccountsRouter);
 app.use("/indicators", IndicatorsRouter);
 app.use("/candles", CandlesRouter);
+app.use("/orders", OrdersRouter);
+
 app.use(errors());
 
 process.on("unhandledRejection", err => console.error("%O", err));
