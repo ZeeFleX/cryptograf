@@ -29,6 +29,9 @@ module.exports = {
       closeTime: {
         type: Sequelize.DATE
       },
+      profit: {
+        type: Sequelize.FLOAT
+      },
       isTesting: {
         type: Sequelize.BOOLEAN
       },

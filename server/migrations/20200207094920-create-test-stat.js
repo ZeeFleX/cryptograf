@@ -1,33 +1,30 @@
 "use strict";
 module.exports = {
   up: (queryInterface, Sequelize) => {
-    return queryInterface.createTable("Tests", {
+    return queryInterface.createTable("TestStats", {
       id: {
         allowNull: false,
         autoIncrement: true,
         primaryKey: true,
         type: Sequelize.INTEGER
       },
-      startTime: {
+      testId: {
+        type: Sequelize.INTEGER
+      },
+      time: {
         type: Sequelize.DATE
       },
-      endTime: {
-        type: Sequelize.DATE
-      },
-      summaryProfit: {
+      balance: {
         type: Sequelize.FLOAT
       },
-      symbol: {
-        type: Sequelize.STRING
-      },
-      params: {
-        type: Sequelize.TEXT
-      },
-      initialBaseBalance: {
+      baseBalance: {
         type: Sequelize.FLOAT
       },
-      initialPriceBalance: {
+      priceBalance: {
         type: Sequelize.FLOAT
+      },
+      orderId: {
+        type: Sequelize.INTEGER
       },
       createdAt: {
         allowNull: false,
@@ -40,6 +37,6 @@ module.exports = {
     });
   },
   down: (queryInterface, Sequelize) => {
-    return queryInterface.dropTable("Tests");
+    return queryInterface.dropTable("TestStats");
   }
 };

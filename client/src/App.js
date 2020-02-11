@@ -9,24 +9,35 @@ import momentLocalizer from "react-widgets-moment";
 import DashboardPage from "./components/dashboard/dashboard";
 import MainMenu from "./components/Navigation/MainMenu/mainmenu";
 import Loader from "./components/ui/loader/Loader";
+import FlashComponent from "./components/ui/flash/Flash";
+import WS from "./services/ws.service";
 
 //Global styles
 import "./sass/ui/index.sass";
 import "react-tabs/style/react-tabs.css";
 
+WS.init();
 momentLocalizer();
 
-@inject("routing", "User", "UI")
+@inject("routing", "User", "UI", "FlashStore")
 @withRouter
 @observer
 class App extends Component {
   render() {
-    const { User, UI } = this.props;
+    const { User, UI, FlashStore } = this.props;
     return (
       <div className="root">
         <MainMenu />
+        {FlashStore.items.map(flash => (
+          <FlashComponent
+            key={flash.id}
+            type={flash.type}
+            message={flash.message}
+            visible={flash.visible}
+          />
+        ))}
         {UI.loading && <Loader />}
-        <Route path={`/`} component={DashboardPage} />
+        <Route path={`/dashboard`} component={DashboardPage} />
         <DevTools />
       </div>
     );

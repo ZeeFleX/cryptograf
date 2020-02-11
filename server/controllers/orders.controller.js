@@ -4,7 +4,7 @@ const { Tester } = require("../services");
 module.exports.get = {
   all: async (req, res, next) => {
     try {
-      const orders = await OrdersRepo.getOrders();
+      const orders = await OrdersRepo.getOrders(req.query);
       res.json(orders);
     } catch (err) {
       console.log(err);
@@ -21,14 +21,6 @@ module.exports.post = {
     } catch (error) {
       console.error(error);
       res.json(err);
-    }
-  },
-  startTest: async (req, res, next) => {
-    try {
-      const results = await Tester.start({});
-      res.json(results);
-    } catch (error) {
-      console.error(error);
     }
   }
 };

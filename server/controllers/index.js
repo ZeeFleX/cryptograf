@@ -1,6 +1,7 @@
 module.exports = {
   AccountsController: require("./accounts.controller"),
-  IndicatorsController: require("./indicators.controller"),
   CandlesController: require("./candles.controller"),
-  OrdersController: require("./orders.controller")
+  OrdersController: require("./orders.controller"),
+  TestsController: require("./tests.controller"),
+  IndicatorsController: require("./indicators.controller")
 };

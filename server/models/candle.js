@@ -4,6 +4,7 @@ module.exports = (sequelize, DataTypes) => {
     "Candle",
     {
       symbol: DataTypes.STRING,
+      period: DataTypes.STRING,
       time: DataTypes.DATE,
       open: DataTypes.FLOAT,
       high: DataTypes.FLOAT,

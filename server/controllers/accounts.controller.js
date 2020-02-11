@@ -1,26 +1,24 @@
-const {
-  AccountsRepo,
-  CandlesRepo,
-  IndicatorsRepo
-} = require("../repositories");
-const moment = require("moment");
+const { AccountsRepo, CandlesRepo } = require("../repositories");
+const { Indicator } = require("../services");
 
 module.exports.get = {
   info: async (req, res, next) => {
     try {
       const candles = await CandlesRepo.getCandles(req.query);
-      res.json(candles);
-    } catch (err) {
-      console.log(err);
-      res.json(err);
-    }
-  },
-  MA: async (req, res, next) => {
-    try {
-      const candles = await CandlesRepo.getCandles(req.query);
-      const MA = IndicatorsRepo.MA(candles, +req.query.period);
-      console.log(MA);
-      res.json(MA);
+
+      const MAD = Indicator.ma(
+        candles.map(candle => {
+          return {
+            time: candle.closeTime,
+            value: candle.close
+          };
+        }),
+        {}
+      );
+      res.json({
+        source: candles[124].close,
+        ma: MAD[124].value
+      });
     } catch (err) {
       console.log(err);
       res.json(err);

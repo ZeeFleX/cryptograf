@@ -13,25 +13,22 @@ const {
 } = require("./middlewares");
 const {
   AccountsRouter,
-  IndicatorsRouter,
   CandlesRouter,
-  OrdersRouter
+  OrdersRouter,
+  TestsRouter,
+  IndicatorsRouter
 } = require("./routers");
 const CandlesRepo = require("./repositories/candles.repo");
 const Binance = require("./services/binance.service");
 
 const app = express();
+const http = require("http").createServer(app);
+const WS = require("./services/ws.service").init(http);
+
 if (process.env.NODE_ENV === "development") app.use(cors());
 let swaggerFile = path.join(__dirname, "docs/openapi.yml");
 
-CandlesRepo.sync([
-  "ETHUSDT",
-  "BNBUSDT",
-  "BTCUSDT",
-  "BNBETH",
-  "ETHBTC",
-  "BNBBTC"
-]);
+CandlesRepo.sync(["BNBBTC", "BTCUSDT", "ETHUSDT", "BNBUSDT"]);
 // setTimeout(() => {
 //   Binance.candlesSubscribe("ETHBTC");
 // }, 1000);
@@ -53,7 +50,7 @@ app.use(
   swaggerUi.setup(null, config.application.swaggerUi)
 );
 app.set("trust proxy", true);
-app.use(express.json({ extended: true }));
+app.use(express.json({ extended: true, limit: "50mb" }));
 app.use(
   express.urlencoded({
     extended: true
@@ -64,9 +61,10 @@ app.use(compression());
 app.use(express.static(`public`));
 
 app.use("/accounts", AccountsRouter);
-app.use("/indicators", IndicatorsRouter);
 app.use("/candles", CandlesRouter);
 app.use("/orders", OrdersRouter);
+app.use("/tests", TestsRouter);
+app.use("/indicators", IndicatorsRouter);
 
 app.use(errors());
 
@@ -75,6 +73,6 @@ process.on("rejectionHandled", err => console.error("%O", err));
 process.on("uncaughtException", err => console.error("%O", err));
 process.on("warning", warning => console.warning(warning));
 
-app.listen("3001", "0.0.0.0", () => {
+http.listen("3001", "0.0.0.0", () => {
   console.info(`Started on 0.0.0.0:3001`);
 });

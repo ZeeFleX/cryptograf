@@ -11,6 +11,9 @@ module.exports = {
       symbol: {
         type: Sequelize.STRING
       },
+      period: {
+        type: Sequelize.STRING
+      },
       time: {
         type: Sequelize.DATE
       },

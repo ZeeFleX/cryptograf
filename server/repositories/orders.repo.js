@@ -4,9 +4,15 @@ const db = require("../models");
 const moment = require("moment");
 
 module.exports = {
-  getOrders: async () => {
+  getOrders: async ({ testId = null }) => {
     try {
-      const Orders = db.Order.findAll();
+      let whereCondition = {};
+      if (testId) whereCondition.testId = testId;
+
+      const Orders = db.Order.findAll({
+        where: whereCondition
+      });
+
       return Orders;
     } catch (error) {
       console.error(error);

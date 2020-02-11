@@ -23,30 +23,20 @@ class MainMenu extends Component {
         <Link to={ROOT} className="navbar-brand">
           Cryptograf
         </Link>
-        <Nav navbar className="ml-auto">
+        <Nav navbar>
           <NavItem>
             <NavLink tag={Link} to="/">
               Главная
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink tag={Link} to="/">
-              О проекте
+            <NavLink tag={Link} to="/dashboard/tests">
+              Тестер
             </NavLink>
           </NavItem>
           <NavItem>
-            <NavLink tag={Link} to="/">
-              Контакты
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink tag={Link} to="/">
-              Сотрудничество
-            </NavLink>
-          </NavItem>
-          <NavItem>
-            <NavLink tag={Link} to="/">
-              Войти
+            <NavLink tag={Link} to="/dashboard/charts" disabled>
+              Графики
             </NavLink>
           </NavItem>
         </Nav>

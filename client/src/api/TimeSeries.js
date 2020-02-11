@@ -1,16 +1,15 @@
 import { API_ROOT } from "config/config";
+import querystring from "querystring";
 
-export async function getCandles() {
+export async function getCandles(symbol, startTime, endTime) {
+  const query = querystring.encode({ symbol, startTime, endTime });
   return new Promise((resolve, reject) => {
-    fetch(
-      `${API_ROOT}/candles?limit=1000&endTime=2019-02-01&indicators=ma,madirection,madcomplex&symbols=btcusdt,ethusdt,bnbusdt,bnbeth,ethbtc,bnbbtc`,
-      {
-        method: "get",
-        headers: {
-          "Content-type": "application/json; charset=UTF-8"
-        }
+    fetch(`${API_ROOT}/candles?${query}`, {
+      method: "get",
+      headers: {
+        "Content-type": "application/json; charset=UTF-8"
       }
-    )
+    })
       .then(Response => {
         return Response.json();
       })

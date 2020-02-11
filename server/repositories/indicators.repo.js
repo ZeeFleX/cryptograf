@@ -1,38 +1,29 @@
-const { Binance, Indicator } = require("../services");
-const db = require("../models");
-const moment = require("moment");
+const config = require("../config");
+const { Indicator } = require("../services");
 
 module.exports = {
-  MA: (candles, period) => {
+  getMAD: async (valuesArray, params) => {
     try {
-      return Indicator.MA(candles, period);
+      const MAD = Indicator.mad(valuesArray, params);
+      return MAD;
     } catch (err) {
-      console.log(err);
       return err;
     }
   },
-  MADirection: candlesWithMA => {
+  getMA: async (valuesArray, params) => {
     try {
-      return Indicator.MADirection(candlesWithMA);
+      const MAD = Indicator.ma(valuesArray, params);
+      return MAD;
     } catch (err) {
-      console.log(err);
       return err;
     }
   },
-  MADComplex: candlesWithMAD => {
+  getMACD: async (valuesArray, params) => {
     try {
-      return Indicator.MADComplex(candlesWithMAD);
+      const MACD = Indicator.macd(valuesArray, params);
+      return MACD;
     } catch (err) {
-      console.log(err);
       return err;
-    }
-  },
-  Bands: (candles, period) => {
-    try {
-      return Indicator.Bands(candles, period);
-    } catch (error) {
-      console.log(error);
-      return error;
     }
   }
 };

@@ -10,6 +10,7 @@ module.exports = (sequelize, DataTypes) => {
       openTime: DataTypes.DATE,
       closePrice: DataTypes.FLOAT,
       closeTime: DataTypes.DATE,
+      profit: DataTypes.FLOAT,
       isTesting: DataTypes.BOOLEAN,
       trailingStop: DataTypes.FLOAT,
       stopLoss: DataTypes.FLOAT,
@@ -21,7 +22,6 @@ module.exports = (sequelize, DataTypes) => {
   Order.associate = function(models) {
     this.hasOne(models.OrderStat, { foreignKey: "orderId" });
     this.belongsTo(models.Test, { foreignKey: "testId" });
-    // associations can be defined here
   };
   return Order;
 };

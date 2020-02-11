@@ -13,8 +13,11 @@ import { Router } from "react-router";
 
 // Stores
 import UI from "./stores/UI.store";
+import FlashStore from "./stores/Flash.store";
 import User from "./stores/User.store";
 import TimeSeries from "./stores/TimeSeries.store";
+import TestsStore from "./stores/Tests.store";
+import IndicatorsStore from "./stores/Indicators.store";
 
 const browserHistory = createBrowserHistory();
 const routing = new RouterStore();
@@ -23,7 +26,10 @@ const stores = {
   routing,
   UI,
   User,
-  TimeSeries
+  TimeSeries,
+  FlashStore,
+  TestsStore,
+  IndicatorsStore
 };
 
 const history = syncHistoryWithStore(browserHistory, routing);

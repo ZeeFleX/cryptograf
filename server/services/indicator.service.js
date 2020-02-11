@@ -1,85 +1,97 @@
-const moment = require("moment");
-const db = require("../models");
-
 class Indicator {
   constructor() {}
-  // Moving Average
-  MA(timeSeries, period = 21) {
+  // Moving Average (скользящая средняя)
+  ma(valuesArray, { period = 21 }) {
     function arraySum(array) {
-      return array.reduce(function(sum, current) {
-        return sum + current.close;
+      return array.reduce(function(sum, currentElement) {
+        return currentElement ? sum + currentElement.value : sum;
       }, 0);
     }
 
-    return timeSeries
-      .map((candle, index) => {
-        // Пропускаем первые свечи, т.к. не хватает данных для покрытия периода
-        if (index < period) return;
+    /* Ищем первый индекс не null для случаев, 
+    когда входной массив вначале имеет некоторое количество null значений.
+    Нужно для построения корректных производных. */
+    const firstNotNullIndexElement = valuesArray.findIndex(
+      item => item.value !== null
+    );
 
-        // Составляем промежуточный массив из элементов = периоду
-        let MAArray = [];
-        for (let i = index - period; i < index; i++) {
-          MAArray.push(timeSeries[i]);
-        }
-        // Считаем сумму элементов промежуточного массива и делим на количество. Получаем точку MA для текущей свечи
-        let MAValue = arraySum(MAArray) / period;
+    return valuesArray.map((element, index) => {
+      // Составляем промежуточный массив из элементов = периоду
+      let MAArray = [];
+      for (let i = index - period; i < index; i++) {
+        MAArray.push(valuesArray[i]);
+      }
 
-        // Возвращаем свечку с добавленным значением MA
-        return {
-          ...candle,
-          MA: MAValue
-        };
-      })
-      .splice(period, timeSeries.length - period); // Отрезаем пустые начальные элементы массива
+      // Считаем сумму элементов промежуточного массива и делим на количество. Получаем точку MA для текущей свечи
+      let MAValue = arraySum(MAArray) / period;
+
+      // Возвращаем значение MA для каждого элемента входящего массива
+      return {
+        index,
+        time: element.time,
+        value: index >= period + firstNotNullIndexElement ? MAValue : null
+      };
+    }); // Отрезаем пустые начальные элементы массива
   }
 
   // Moving Average Direction
-  MADirection(timeSeries, shift = 5) {
-    return timeSeries
-      .map((candle, index) => {
-        if (index < shift) return;
-        const difference = candle.MA - timeSeries[index - shift].MA;
-        return {
-          ...candle,
-          MADirection: difference / (candle.MA / 100)
-        };
-      })
-      .splice(shift, timeSeries.length - shift);
+  mad(valuesArray, { period = 48, shift = 1 }) {
+    // Строим MA на основе входных данных
+    const MAValuesArray = this.ma(valuesArray, { period });
+    const MADValuesArray = MAValuesArray.map((element, index) => {
+      // Считаем разницу текущего MA - MA 5 значений назад
+      const difference =
+        index >= shift + period
+          ? ((element.value - MAValuesArray[index - shift].value) /
+              MAValuesArray[index - shift].value) *
+            100
+          : null;
+      return {
+        index,
+        time: element.time,
+        value: difference
+      };
+    });
+    return this.ma(MADValuesArray, { period: 9 });
   }
 
-  // Bands
-  Bands(timeSeries, period = 3) {
-    function arraySum(array, price) {
-      return array.reduce(function(sum, current) {
-        return sum + current[price];
-      }, 0);
-    }
+  macd(valuesArray, { shortPeriod = 12, longPeriod = 26, signalPeriod = 9 }) {
+    // Считаем исходные данные. 2 MA с разными периодами
+    const shortMAArray = this.ma(valuesArray, { period: shortPeriod });
+    const longMAArray = this.ma(valuesArray, { period: longPeriod });
 
-    return timeSeries
-      .map((candle, index) => {
-        // Пропускаем первые свечи, т.к. не хватает данных для покрытия периода
-        if (index < period) return;
+    // MACD линия (короткая средняя минус длинная средняя)
+    const MACDArray = shortMAArray.map((shortMAItem, index) => {
+      return {
+        index,
+        time: shortMAItem.time,
+        value:
+          index >= longPeriod
+            ? shortMAItem.value - longMAArray[index].value
+            : null
+      };
+    });
 
-        // Составляем промежуточный массив из элементов = периоду
-        let MAArray = [];
-        for (let i = index - period; i < index; i++) {
-          MAArray.push(timeSeries[i]);
-        }
-        // Считаем сумму элементов промежуточного массива и делим на количество. Получаем точку MA для текущей свечи
-        let MAhigh = arraySum(MAArray, "high") / period;
-        let MAlow = arraySum(MAArray, "low") / period;
-        let MAclose = arraySum(MAArray, "close") / period;
+    // Сигнальная линия. Сглаженный MACD
+    const MACDSignalArray = this.ma(MACDArray, { period: signalPeriod });
 
-        // Возвращаем свечку с добавленным значением MA
-        return {
-          ...candle,
-          bands: {
-            width: MAhigh - MAlow,
-            signal: ((MAclose - MAlow) / (MAhigh - MAlow)) * 100
-          }
-        };
-      })
-      .splice(period, timeSeries.length - period); // Отрезаем пустые начальные элементы массива
+    // Гистограмма. Сигнальная линия минус MACD линия.
+    const MACDBarsArray = MACDSignalArray.map((MACDSignalItem, index) => {
+      return {
+        index,
+        time: MACDSignalItem.time,
+        value:
+          index >= signalPeriod + longPeriod
+            ? MACDArray[index].value - MACDSignalItem.value
+            : null
+      };
+    });
+
+    return {
+      base: MACDArray,
+      signal: MACDSignalArray,
+      bars: MACDBarsArray
+    };
   }
 }
 
