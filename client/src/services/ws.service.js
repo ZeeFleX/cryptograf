@@ -1,10 +1,11 @@
 import io from "socket.io-client";
 import TestsStore from "../stores/Tests.store";
 import FlashStore from "../stores/Flash.store";
+import { WS_SERVER } from "../config/config";
 
 class WebSocket {
   constructor() {
-    this.connection = io("http://localhost:3001");
+    this.connection = io(WS_SERVER);
   }
 
   init() {
