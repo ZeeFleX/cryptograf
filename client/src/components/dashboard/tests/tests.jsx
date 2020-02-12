@@ -53,7 +53,7 @@ class TestsPage extends Component {
         initialPriceBalance: 500,
         stopLoss: 1,
         trailingStop: 50,
-        takeProfit: 20,
+        takeProfit: 5,
         riskAmount: 100
       }
     };

@@ -6,6 +6,7 @@ import { withRouter } from "react-router-dom";
 import momentLocalizer from "react-widgets-moment";
 
 //Components
+import MainPage from "./components/mainpage";
 import DashboardPage from "./components/dashboard/dashboard";
 import MainMenu from "./components/Navigation/MainMenu/mainmenu";
 import Loader from "./components/ui/loader/Loader";
@@ -37,6 +38,7 @@ class App extends Component {
           />
         ))}
         {UI.loading && <Loader />}
+        <Route exact path={`/`} component={MainPage} />
         <Route path={`/dashboard`} component={DashboardPage} />
         <DevTools />
       </div>
