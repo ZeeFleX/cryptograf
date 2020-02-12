@@ -46,7 +46,7 @@ class TestsPage extends Component {
       showNewTestModal: false,
       formData: {
         strategy: "macd",
-        symbol: "BTCUSDT",
+        symbol: "BNBBTC",
         startTime: "2019-01-01",
         endTime: "2020-01-01",
         initialBaseBalance: 500,
@@ -157,9 +157,15 @@ class TestsPage extends Component {
                   name="symbol"
                 >
                   <option value="BTCUSDT">BTC/USDT</option>
-                  <option value="BNBUSDT">BNB/USDT</option>
                   <option value="ETHUSDT">ETH/USDT</option>
+                  <option value="BNBUSDT">BNB/USDT</option>
+                  <option value="ETHBTC">ETH/BTC</option>
                   <option value="BNBBTC">BNB/BTC</option>
+                  <option value="BNBETH">BNB/ETH</option>
+                  <option value="ETCBNB">ETC/BNB</option>
+                  <option value="IOTABNB">IOTA/BNB</option>
+                  <option value="LTCBNB">LTC/BNB</option>
+                  <option value="AIONBNB">AION/BNB</option>
                 </FormSelect>
               </FormGroup>
               <FormGroup>

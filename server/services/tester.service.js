@@ -19,7 +19,8 @@ class Tester {
     riskAmount = 50,
     MAPeriod = 21,
     MADShift = 5,
-    trailingStop = 10
+    trailingStop = 10,
+    margin = 5
   }) {
     const newTest = await db.Test.create({
       startTime,
@@ -94,7 +95,8 @@ class Tester {
           const closedOrder = await this.closeOrder(
             openOrder.id,
             timeSeriesCurrentValue.time,
-            timeSeriesCurrentValue.close
+            timeSeriesCurrentValue.close,
+            margin
           );
 
           await db.TestStat.create({
@@ -119,7 +121,8 @@ class Tester {
           const closedOrder = await this.closeOrder(
             openOrder.id,
             timeSeriesCurrentValue.time,
-            timeSeriesCurrentValue.close
+            timeSeriesCurrentValue.close,
+            margin
           );
 
           await db.TestStat.create({
@@ -249,7 +252,7 @@ class Tester {
     return testResults;
   }
 
-  async closeOrder(orderId, closeTime, closePrice) {
+  async closeOrder(orderId, closeTime, closePrice, margin) {
     let orderForClose = await db.Order.findOne({
       where: {
         id: orderId
@@ -258,10 +261,11 @@ class Tester {
 
     if (orderForClose.type === "buy") {
       const profit =
-        orderForClose.amount *
+        (orderForClose.amount *
           ((closePrice - orderForClose.openPrice) / orderForClose.openPrice +
             1) -
-        orderForClose.amount;
+          orderForClose.amount) *
+        margin;
 
       orderForClose = {
         ...orderForClose,
@@ -278,10 +282,11 @@ class Tester {
       return orderForClose;
     } else if (orderForClose.type === "sell") {
       const profit =
-        orderForClose.amount *
+        (orderForClose.amount *
           ((orderForClose.openPrice - closePrice) / orderForClose.openPrice +
             1) -
-        orderForClose.amount;
+          orderForClose.amount) *
+        margin;
 
       orderForClose = {
         ...orderForClose,

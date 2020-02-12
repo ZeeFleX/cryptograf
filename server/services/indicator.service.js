@@ -35,7 +35,7 @@ class Indicator {
   }
 
   // Moving Average Direction
-  mad(valuesArray, { period = 48, shift = 1 }) {
+  mad(valuesArray, { period = 52, shift = 1 }) {
     // Строим MA на основе входных данных
     const MAValuesArray = this.ma(valuesArray, { period });
     const MADValuesArray = MAValuesArray.map((element, index) => {
@@ -55,7 +55,7 @@ class Indicator {
     return this.ma(MADValuesArray, { period: 9 });
   }
 
-  macd(valuesArray, { shortPeriod = 12, longPeriod = 26, signalPeriod = 9 }) {
+  macd(valuesArray, { shortPeriod = 24, longPeriod = 52, signalPeriod = 9 }) {
     // Считаем исходные данные. 2 MA с разными периодами
     const shortMAArray = this.ma(valuesArray, { period: shortPeriod });
     const longMAArray = this.ma(valuesArray, { period: longPeriod });
