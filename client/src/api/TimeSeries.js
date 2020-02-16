@@ -1,8 +1,8 @@
 import { API_ROOT } from "config/config";
 import querystring from "querystring";
 
-export async function getCandles(symbol, startTime, endTime) {
-  const query = querystring.encode({ symbol, startTime, endTime });
+export async function getCandles({ symbol, startTime, endTime, tsv }) {
+  const query = querystring.encode({ symbol, startTime, endTime, tsv });
   return new Promise((resolve, reject) => {
     fetch(`${API_ROOT}/candles?${query}`, {
       method: "get",

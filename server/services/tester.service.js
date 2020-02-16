@@ -20,7 +20,7 @@ class Tester {
     MAPeriod = 21,
     MADShift = 5,
     trailingStop = 10,
-    margin = 5
+    margin = 3
   }) {
     const newTest = await db.Test.create({
       startTime,
@@ -67,6 +67,7 @@ class Tester {
     });
 
     await asyncForEach(indicatorData, async (timeSeriesCurrentValue, index) => {
+      const nextCandle = indicatorData[index + 1];
       const signal = selectedStrategy.checkForSignal(
         indicatorData,
         timeSeriesCurrentValue,
@@ -94,8 +95,8 @@ class Tester {
 
           const closedOrder = await this.closeOrder(
             openOrder.id,
-            timeSeriesCurrentValue.time,
-            timeSeriesCurrentValue.close,
+            nextCandle.time,
+            nextCandle.open,
             margin
           );
 
@@ -110,8 +111,8 @@ class Tester {
           });
         } else if (
           openOrder.type === "sell" &&
-          (timeSeriesCurrentValue.close > openOrder.stopLoss ||
-            timeSeriesCurrentValue.close < openOrder.takeProfit)
+          (nextCandle.open > openOrder.stopLoss ||
+            nextCandle.open < openOrder.takeProfit)
         ) {
           const currentBalance = await this.getCurrentBalance(
             newTest.id,
@@ -120,8 +121,8 @@ class Tester {
 
           const closedOrder = await this.closeOrder(
             openOrder.id,
-            timeSeriesCurrentValue.time,
-            timeSeriesCurrentValue.close,
+            nextCandle.time,
+            nextCandle.open,
             margin
           );
 
@@ -135,11 +136,7 @@ class Tester {
             orderId: closedOrder.id
           });
         } else {
-          this.updateTrailingStop(
-            openOrder,
-            trailingStop,
-            timeSeriesCurrentValue.close
-          );
+          this.updateTrailingStop(openOrder, trailingStop, nextCandle.open);
         }
       });
 
@@ -153,31 +150,24 @@ class Tester {
             if (availableBalance > 0) {
               await db.Order.create({
                 symbol,
-                openPrice: timeSeriesCurrentValue.close,
+                openPrice: nextCandle.open,
                 amount: (availableBalance * riskAmount) / 100,
                 type: signal.type,
-                openTime: moment(timeSeriesCurrentValue.time),
+                openTime: moment(nextCandle.time),
                 isTesting: true,
                 status: "open",
                 testId: newTest.id,
                 stopLoss:
-                  timeSeriesCurrentValue.close -
-                  this.calculateDifference(
-                    timeSeriesCurrentValue.close,
-                    stopLoss
-                  ),
+                  signal.stopLoss ||
+                  nextCandle.close -
+                    this.calculateDifference(nextCandle.close, stopLoss),
                 trailingStop:
-                  timeSeriesCurrentValue.close -
-                  this.calculateDifference(
-                    timeSeriesCurrentValue.close,
-                    trailingStop
-                  ),
+                  nextCandle.close -
+                  this.calculateDifference(nextCandle.close, trailingStop),
                 takeProfit:
-                  timeSeriesCurrentValue.close +
-                  this.calculateDifference(
-                    timeSeriesCurrentValue.close,
-                    takeProfit
-                  )
+                  signal.takeProfit ||
+                  nextCandle.close +
+                    this.calculateDifference(nextCandle.close, takeProfit)
               });
             }
           } else if (signal.type === "sell") {
@@ -188,31 +178,24 @@ class Tester {
             if (availableBalance > 0) {
               await db.Order.create({
                 symbol,
-                openPrice: timeSeriesCurrentValue.close,
+                openPrice: nextCandle.open,
                 amount: (availableBalance * riskAmount) / 100,
                 type: signal.type,
-                openTime: moment(timeSeriesCurrentValue.time),
+                openTime: moment(nextCandle.time),
                 isTesting: true,
                 status: "open",
                 testId: newTest.id,
                 stopLoss:
-                  timeSeriesCurrentValue.close +
-                  this.calculateDifference(
-                    timeSeriesCurrentValue.close,
-                    stopLoss
-                  ),
+                  signal.stopLoss ||
+                  nextCandle.close +
+                    this.calculateDifference(nextCandle.close, stopLoss),
                 trailingStop:
-                  timeSeriesCurrentValue.close +
-                  this.calculateDifference(
-                    timeSeriesCurrentValue.close,
-                    trailingStop
-                  ),
+                  nextCandle.close +
+                  this.calculateDifference(nextCandle.close, trailingStop),
                 takeProfit:
-                  timeSeriesCurrentValue.close -
-                  this.calculateDifference(
-                    timeSeriesCurrentValue.close,
-                    takeProfit
-                  )
+                  signal.takeProfit ||
+                  nextCandle.close -
+                    this.calculateDifference(nextCandle.close, takeProfit)
               });
             }
           }

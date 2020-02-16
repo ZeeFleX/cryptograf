@@ -1,6 +1,7 @@
 const { CandlesRepo } = require("../repositories");
 const moment = require("moment");
 const { Indicator } = require("../services/");
+const TSV = require("tsv");
 
 module.exports.get = {
   candles: async (req, res, next) => {
@@ -25,10 +26,29 @@ module.exports.get = {
         ](valuesArray, { period: 21 });
       });
 
-      res.json({
-        candles,
-        indicators
-      });
+      // if (req.query.tsv) {
+      //   res.json({
+      //     candles: TSV.stringify(
+      //       candles.map(candle => {
+      //         return {
+      //           date: moment(candle.closeTime).format("YYYY-MM-DD HH:mm"),
+      //           open: candle.open,
+      //           high: candle.high,
+      //           low: candle.low,
+      //           close: candle.close,
+      //           volume: candle.volume
+      //         };
+      //       })
+      //     ),
+      //     indicators
+      //   });
+      // } else {
+      //   res.json({
+      //     candles,
+      //     indicators
+      //   });
+      // }
+      res.json(candles);
     } catch (err) {
       console.log(err);
       res.json(err);

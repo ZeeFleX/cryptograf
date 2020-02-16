@@ -4,7 +4,6 @@ import { observer, inject } from "mobx-react";
 
 //Components
 import TestsPage from "./tests/tests.jsx";
-import ChartsPage from "./charts/charts.jsx";
 import TestsDetailsPage from "./tests/details/details.jsx";
 
 //Styles
@@ -24,10 +23,6 @@ class DashboardPage extends Component {
         <Route
           path={`${this.props.match.path}/tests/:testId`}
           component={TestsDetailsPage}
-        />
-        <Route
-          path={`${this.props.match.path}/charts`}
-          component={ChartsPage}
         />
       </div>
     );

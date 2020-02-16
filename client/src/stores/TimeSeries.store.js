@@ -10,17 +10,22 @@ class TimeSeriesStore {
   // Getters
 
   // Actions
-  @action async getCandles(
-    symbol,
-    startTime = moment().format("YYYY-MM-DD"),
-    endTime = moment()
-      .subtract("months", 3)
-      .format("YYYY-MM-DD")
-  ) {
-    const getCandlesPromise = getCandles(symbol, startTime, endTime);
+  @action async getCandles({
+    symbol = "BTCUSDT",
+    endTime = moment().format("YYYY-MM-DD"),
+    startTime = moment()
+      .subtract(3, "months")
+      .format("YYYY-MM-DD"),
+    tsv = false
+  }) {
+    const getCandlesPromise = getCandles({ symbol, startTime, endTime, tsv });
     getCandlesPromise.then(results => {
-      const { candles } = results;
-      this.candles = candles;
+      this.candles = results.map(candle => {
+        return {
+          ...candle,
+          date: moment(candle.closeTime).toDate()
+        };
+      });
     });
 
     return getCandlesPromise;

@@ -29,6 +29,7 @@ import {
 } from "react-timeseries-charts";
 import moment from "moment";
 import pluralize from "pluralize-ru";
+import CandlesChart from "../../charts/candles";
 
 //Components
 
@@ -40,228 +41,260 @@ import "./details.sass";
 class TestDetailsPage extends Component {
   constructor(props) {
     super(props);
-    this.state = {
-      candles: null,
-      balanceHistory: null,
-      baseBalanceHistory: null,
-      priceBalanceHistory: null,
-      MAD: null,
-      MA: null,
-      styles: {
-        macd: {
-          base: styler([{ key: "value", color: "blue", width: 2 }]),
-          bars: styler([{ key: "value", color: "green", width: 2 }]),
-          signal: styler([
-            { key: "value", color: "red", width: 2, strokeDasharray: "1,1" }
-          ])
-        },
-        ma: styler([{ key: "value", color: "red", width: 2 }]),
-        maShort: styler([{ key: "value", color: "green", width: 2 }]),
-        mad: styler([{ key: "value", color: "orange", width: 2 }]),
-        balance: {
-          summary: styler([{ key: "value", color: "green", width: 2 }]),
-          base: styler([{ key: "value", color: "blue", width: 1 }]),
-          price: styler([{ key: "value", color: "red", width: 1 }])
-        },
-        buyOrders: styler([{ key: "value", color: "green" }]),
-        sellOrders: styler([{ key: "value", color: "red" }])
-      }
-    };
+    this.state = {};
   }
   async componentWillMount() {
     const { testId } = this.props.match.params;
     await this.props.TestsStore.getTest(testId);
 
     const test = this.props.TestsStore.test;
-    await this.props.TimeSeries.getCandles(
-      test.symbol,
-      moment(test.startTime).format("YYYY-MM-DD"),
-      moment(test.endTime).format("YYYY-MM-DD")
-    );
+    // await this.props.TimeSeries.getCandles(
+    //   test.symbol,
+    //   moment(test.startTime).format("YYYY-MM-DD"),
+    //   moment(test.endTime).format("YYYY-MM-DD")
+    // );
 
-    const valuesArray = this.props.TimeSeries.candles.map(candle => {
-      return {
-        time: candle.closeTime,
-        value: candle.close
-      };
-    });
-    await this.props.IndicatorsStore.getMAD(valuesArray, {});
+    // const valuesArray = this.props.TimeSeries.candles.map(candle => {
+    //   return {
+    //     time: candle.closeTime,
+    //     value: candle.close
+    //   };
+    // });
+    // await this.props.IndicatorsStore.getMAD(valuesArray, {});
 
-    await this.props.IndicatorsStore.getMA(valuesArray, { period: 96 }, "long");
-    await this.props.IndicatorsStore.getMA(
-      valuesArray,
-      { period: 48 },
-      "short"
-    );
+    // await this.props.IndicatorsStore.getChannel(this.props.TimeSeries.candles, {
+    //   period: 14
+    // });
 
-    await this.props.IndicatorsStore.getMACD(valuesArray, {});
+    // await this.props.IndicatorsStore.getMA(valuesArray, { period: 14 }, "long");
+    // await this.props.IndicatorsStore.getMA(
+    //   valuesArray,
+    //   { period: 14 },
+    //   "short"
+    // );
 
-    const candlesPoints = this.props.TimeSeries.candles.map(candle => {
-      return [moment(candle.closeTime).valueOf(), candle.close];
-    });
+    // await this.props.IndicatorsStore.getMACD(valuesArray, {});
 
-    const balancePoints = test.TestStats.map(statItem => {
-      return [moment(statItem.time).valueOf(), statItem.balance];
-    });
+    // const candlesPoints = this.props.TimeSeries.candles.map(candle => {
+    //   return [moment(candle.closeTime).valueOf(), candle.close];
+    // });
 
-    const baseBalancePoints = test.TestStats.map(statItem => {
-      return [moment(statItem.time).valueOf(), statItem.baseBalance];
-    });
+    // const balancePoints = test.TestStats.map(statItem => {
+    //   return [moment(statItem.time).valueOf(), statItem.balance];
+    // });
 
-    const priceBalancePoints = test.TestStats.map(statItem => {
-      return [moment(statItem.time).valueOf(), statItem.priceBalance];
-    });
+    // const baseBalancePoints = test.TestStats.map(statItem => {
+    //   return [moment(statItem.time).valueOf(), statItem.baseBalance];
+    // });
 
-    const MADPoints = this.props.IndicatorsStore.MAD.map(item => {
-      return [moment(item.time).valueOf(), item.value];
-    });
+    // const priceBalancePoints = test.TestStats.map(statItem => {
+    //   return [moment(statItem.time).valueOf(), statItem.priceBalance];
+    // });
 
-    const MAPoints = this.props.IndicatorsStore.MA.long.map(item => {
-      return [moment(item.time).valueOf(), item.value];
-    });
+    // const MADPoints = this.props.IndicatorsStore.MAD.map(item => {
+    //   return [moment(item.time).valueOf(), item.value];
+    // });
 
-    const MAShortPoints = this.props.IndicatorsStore.MA.short.map(item => {
-      return [moment(item.time).valueOf(), item.value];
-    });
+    // const MAPoints = this.props.IndicatorsStore.MA.long.map(item => {
+    //   return [moment(item.time).valueOf(), item.value];
+    // });
 
-    const MACDPoints = {
-      base: this.props.IndicatorsStore.MACD.base.map(item => {
-        return [moment(item.time).valueOf(), item.value];
-      }),
-      signal: this.props.IndicatorsStore.MACD.signal.map(item => {
-        return [moment(item.time).valueOf(), item.value];
-      }),
-      bars: this.props.IndicatorsStore.MACD.bars.map(item => {
-        return [Index.getIndexString("1h", new Date(item.time)), item.value];
-      })
-    };
+    // const MAShortPoints = this.props.IndicatorsStore.MA.short.map(item => {
+    //   return [moment(item.time).valueOf(), item.value];
+    // });
 
-    const ordersBuyOpenPoints = test.Orders.filter(
-      order => order.type === "buy"
-    ).map(order => {
-      return [moment(order.openTime).valueOf(), order.openPrice];
-    });
-    const ordersSellOpenPoints = test.Orders.filter(
-      order => order.type === "sell"
-    ).map(order => {
-      return [moment(order.openTime).valueOf(), order.openPrice];
-    });
-    const ordersBuyClosePoints = test.Orders.filter(
-      order => order.type === "buy"
-    ).map(order => {
-      return [moment(order.closeTime).valueOf(), order.closePrice];
-    });
-    const ordersSellClosePoints = test.Orders.filter(
-      order => order.type === "sell"
-    ).map(order => {
-      return [moment(order.closeTime).valueOf(), order.closePrice];
-    });
+    // const MACDPoints = {
+    //   base: this.props.IndicatorsStore.MACD.base.map(item => {
+    //     return [moment(item.time).valueOf(), item.value];
+    //   }),
+    //   signal: this.props.IndicatorsStore.MACD.signal.map(item => {
+    //     return [moment(item.time).valueOf(), item.value];
+    //   }),
+    //   bars: this.props.IndicatorsStore.MACD.bars.map(item => {
+    //     return [Index.getIndexString("1d", new Date(item.time)), item.value];
+    //   })
+    // };
 
-    const candlesSeries = new TimeSeries({
-      name: "Candles",
-      columns: ["time", "value"],
-      points: candlesPoints
-    });
+    // const channelMaxPoints = this.props.IndicatorsStore.channel.map(item => {
+    //   return [moment(item.time).valueOf(), item.max];
+    // });
 
-    const balanceHistorySeries = new TimeSeries({
-      name: "Balance",
-      columns: ["time", "value"],
-      points: balancePoints
-    });
+    // const channelMinPoints = this.props.IndicatorsStore.channel.map(item => {
+    //   return [moment(item.time).valueOf(), item.min];
+    // });
 
-    const baseBalanceHistorySeries = new TimeSeries({
-      name: "Base Balance",
-      columns: ["time", "value"],
-      points: baseBalancePoints
-    });
+    // const channelMiddlePoints = this.props.IndicatorsStore.channel.map(item => {
+    //   return [moment(item.time).valueOf(), item.middle];
+    // });
 
-    const priceBalanceHistorySeries = new TimeSeries({
-      name: "Price Balance",
-      columns: ["time", "value"],
-      points: priceBalancePoints
-    });
+    // const channelRangePoints = this.props.IndicatorsStore.channel.map(item => {
+    //   return [moment(item.time).valueOf(), item.range];
+    // });
 
-    const MADSeries = new TimeSeries({
-      name: "MAD",
-      columns: ["time", "value"],
-      points: MADPoints
-    });
+    // const ordersBuyOpenPoints = test.Orders.filter(
+    //   order => order.type === "buy"
+    // )
+    //   .sort((a, b) => (a.openTime > b.openTime ? 1 : -1))
+    //   .map(order => {
+    //     return [moment(order.openTime).valueOf(), order.openPrice];
+    //   });
+    // const ordersSellOpenPoints = test.Orders.filter(
+    //   order => order.type === "sell"
+    // )
+    //   .sort((a, b) => (a.openTime > b.openTime ? 1 : -1))
+    //   .map(order => {
+    //     return [moment(order.openTime).valueOf(), order.openPrice];
+    //   });
+    // const ordersBuyClosePoints = test.Orders.filter(
+    //   order => order.type === "buy"
+    // )
+    //   .sort((a, b) => (a.closeTime > b.closeTime ? 1 : -1))
+    //   .map(order => {
+    //     return [moment(order.closeTime).valueOf(), order.closePrice];
+    //   });
+    // const ordersSellClosePoints = test.Orders.filter(
+    //   order => order.type === "sell"
+    // )
+    //   .sort((a, b) => (a.closeTime > b.closeTime ? 1 : -1))
+    //   .map(order => {
+    //     return [moment(order.closeTime).valueOf(), order.closePrice];
+    //   });
 
-    const MASeries = new TimeSeries({
-      name: "MA",
-      columns: ["time", "value"],
-      points: MAPoints
-    });
+    // const candlesSeries = new TimeSeries({
+    //   name: "Candles",
+    //   columns: ["time", "value"],
+    //   points: candlesPoints
+    // });
 
-    const MAShortSeries = new TimeSeries({
-      name: "MA Short",
-      columns: ["time", "value"],
-      points: MAShortPoints
-    });
+    // const balanceHistorySeries = new TimeSeries({
+    //   name: "Balance",
+    //   columns: ["time", "value"],
+    //   points: balancePoints
+    // });
 
-    const MACDSeries = {
-      base: new TimeSeries({
-        name: "MACD base",
-        columns: ["time", "value"],
-        points: MACDPoints.base
-      }),
-      signal: new TimeSeries({
-        name: "MACD signal",
-        columns: ["time", "value"],
-        points: MACDPoints.signal
-      }),
-      bars: new TimeSeries({
-        name: "MACD bars",
-        columns: ["index", "value"],
-        points: MACDPoints.bars
-      })
-    };
+    // const baseBalanceHistorySeries = new TimeSeries({
+    //   name: "Base Balance",
+    //   columns: ["time", "value"],
+    //   points: baseBalancePoints
+    // });
 
-    const ordersBuyOpenSeries = new TimeSeries({
-      name: "Orders buy",
-      columns: ["time", "value"],
-      points: ordersBuyOpenPoints
-    });
+    // const priceBalanceHistorySeries = new TimeSeries({
+    //   name: "Price Balance",
+    //   columns: ["time", "value"],
+    //   points: priceBalancePoints
+    // });
 
-    const ordersSellOpenSeries = new TimeSeries({
-      name: "Orders sell",
-      columns: ["time", "value"],
-      points: ordersSellOpenPoints
-    });
+    // const MADSeries = new TimeSeries({
+    //   name: "MAD",
+    //   columns: ["time", "value"],
+    //   points: MADPoints
+    // });
 
-    const ordersBuyCloseSeries = new TimeSeries({
-      name: "Orders buy",
-      columns: ["time", "value"],
-      points: ordersBuyClosePoints
-    });
+    // const MASeries = new TimeSeries({
+    //   name: "MA",
+    //   columns: ["time", "value"],
+    //   points: MAPoints
+    // });
 
-    const ordersSellCloseSeries = new TimeSeries({
-      name: "Orders sell",
-      columns: ["time", "value"],
-      points: ordersSellClosePoints
-    });
+    // const MAShortSeries = new TimeSeries({
+    //   name: "MA Short",
+    //   columns: ["time", "value"],
+    //   points: MAShortPoints
+    // });
 
-    this.setState({
-      candles: candlesSeries,
-      balanceHistory: balanceHistorySeries,
-      baseBalanceHistory: baseBalanceHistorySeries,
-      priceBalanceHistory: priceBalanceHistorySeries,
-      MAD: MADSeries,
-      MA: MASeries,
-      MAShort: MAShortSeries,
-      MACD: MACDSeries,
-      orders: {
-        buy: {
-          open: ordersBuyOpenSeries,
-          close: ordersBuyCloseSeries
-        },
-        sell: {
-          open: ordersSellOpenSeries,
-          close: ordersSellCloseSeries
-        }
-      },
-      timeRange: candlesSeries.range()
-    });
+    // const MACDSeries = {
+    //   base: new TimeSeries({
+    //     name: "MACD base",
+    //     columns: ["time", "value"],
+    //     points: MACDPoints.base
+    //   }),
+    //   signal: new TimeSeries({
+    //     name: "MACD signal",
+    //     columns: ["time", "value"],
+    //     points: MACDPoints.signal
+    //   }),
+    //   bars: new TimeSeries({
+    //     name: "MACD bars",
+    //     columns: ["index", "value"],
+    //     points: MACDPoints.bars
+    //   })
+    // };
+
+    // const ordersBuyOpenSeries = new TimeSeries({
+    //   name: "Orders buy",
+    //   columns: ["time", "value"],
+    //   points: ordersBuyOpenPoints
+    // });
+
+    // const ordersSellOpenSeries = new TimeSeries({
+    //   name: "Orders sell",
+    //   columns: ["time", "value"],
+    //   points: ordersSellOpenPoints
+    // });
+
+    // const ordersBuyCloseSeries = new TimeSeries({
+    //   name: "Orders buy",
+    //   columns: ["time", "value"],
+    //   points: ordersBuyClosePoints
+    // });
+
+    // const ordersSellCloseSeries = new TimeSeries({
+    //   name: "Orders sell",
+    //   columns: ["time", "value"],
+    //   points: ordersSellClosePoints
+    // });
+
+    // const channelMaxSeries = new TimeSeries({
+    //   name: "Channel max",
+    //   columns: ["time", "value"],
+    //   points: channelMaxPoints
+    // });
+
+    // const channelMinSeries = new TimeSeries({
+    //   name: "Channel min",
+    //   columns: ["time", "value"],
+    //   points: channelMinPoints
+    // });
+
+    // const channelMiddleSeries = new TimeSeries({
+    //   name: "Channel middle",
+    //   columns: ["time", "value"],
+    //   points: channelMiddlePoints
+    // });
+
+    // const channelRangeSeries = new TimeSeries({
+    //   name: "Channel min",
+    //   columns: ["time", "value"],
+    //   points: channelRangePoints
+    // });
+
+    // this.setState({
+    //   candles: candlesSeries,
+    //   balanceHistory: balanceHistorySeries,
+    //   baseBalanceHistory: baseBalanceHistorySeries,
+    //   priceBalanceHistory: priceBalanceHistorySeries,
+    //   MAD: MADSeries,
+    //   MA: MASeries,
+    //   MAShort: MAShortSeries,
+    //   MACD: MACDSeries,
+    //   orders: {
+    //     buy: {
+    //       open: ordersBuyOpenSeries,
+    //       close: ordersBuyCloseSeries
+    //     },
+    //     sell: {
+    //       open: ordersSellOpenSeries,
+    //       close: ordersSellCloseSeries
+    //     }
+    //   },
+    //   channel: {
+    //     max: channelMaxSeries,
+    //     min: channelMinSeries,
+    //     middle: channelMiddleSeries,
+    //     range: channelRangeSeries
+    //   },
+    //   timeRange: candlesSeries.range()
+    // });
   }
 
   handleTimeRangeChange(timeRange) {
@@ -295,206 +328,7 @@ class TestDetailsPage extends Component {
                     {this.renderTestParams(test)}
                     <hr />
                     <h3>{test.symbol}</h3>
-                    {this.state.candles && this.state.balanceHistory && (
-                      <Resizable>
-                        <ChartContainer
-                          timeRange={this.state.timeRange}
-                          timeAxisTickCount={10}
-                          enablePanZoom={true}
-                          maxTime={this.state.candles.range().end()}
-                          minTime={this.state.candles.range().begin()}
-                          onTimeRangeChanged={this.handleTimeRangeChange.bind(
-                            this
-                          )}
-                          showGrid
-                        >
-                          <ChartRow height="400">
-                            <YAxis
-                              id={`main-${test.symbol}`}
-                              label={test.symbol}
-                              width="100"
-                              type="linear"
-                              format=".4f"
-                              min={this.state.candles.min()}
-                              max={this.state.candles.max()}
-                              showGrid
-                              labelOffset={-15}
-                              style={{
-                                ticks: {
-                                  stroke: "#aaa",
-                                  opacity: 0.25,
-                                  "stroke-dasharray": "1,1"
-                                }
-                              }}
-                            />
-                            <Charts>
-                              <LineChart
-                                axis={`main-${test.symbol}`}
-                                series={this.state.candles}
-                              />
-                              <LineChart
-                                axis={`main-${test.symbol}`}
-                                series={this.state.MA}
-                                style={this.state.styles.ma}
-                              />
-                              <LineChart
-                                axis={`main-${test.symbol}`}
-                                series={this.state.MAShort}
-                                style={this.state.styles.maShort}
-                              />
-                              <ScatterChart
-                                axis={`main-${test.symbol}`}
-                                series={this.state.orders.buy.open}
-                                radius={(event, column) => 4}
-                                style={this.state.styles.buyOrders}
-                              />
-                              <ScatterChart
-                                axis={`main-${test.symbol}`}
-                                series={this.state.orders.buy.close}
-                                radius={(event, column) => 2}
-                                style={this.state.styles.buyOrders}
-                              />
-                              <ScatterChart
-                                axis={`main-${test.symbol}`}
-                                series={this.state.orders.sell.open}
-                                radius={(event, column) => 4}
-                                style={this.state.styles.sellOrders}
-                              />
-                              <ScatterChart
-                                axis={`main-${test.symbol}`}
-                                series={this.state.orders.sell.close}
-                                radius={(event, column) => 2}
-                                style={this.state.styles.sellOrders}
-                              />
-                            </Charts>
-                          </ChartRow>
-                          <ChartRow height="150">
-                            <YAxis
-                              id={`macd-${test.symbol}`}
-                              label={`MACD`}
-                              width="100"
-                              type="linear"
-                              format=".4f"
-                              min={this.state.MACD.base.min()}
-                              max={this.state.MACD.base.max()}
-                              showGrid
-                              labelOffset={-15}
-                              style={{
-                                ticks: {
-                                  stroke: "#aaa",
-                                  opacity: 0.25,
-                                  "stroke-dasharray": "1,1"
-                                }
-                              }}
-                            />
-                            <Charts>
-                              <LineChart
-                                axis={`macd-${test.symbol}`}
-                                series={this.state.MACD.base}
-                                style={this.state.styles.macd.base}
-                              />
-                              <LineChart
-                                axis={`macd-${test.symbol}`}
-                                series={this.state.MACD.signal}
-                                style={this.state.styles.macd.signal}
-                              />
-                              <BarChart
-                                axis={`macd-${test.symbol}`}
-                                spacing={1}
-                                series={this.state.MACD.bars}
-                                minBarHeight={0}
-                                style={this.state.styles.macd.bars}
-                              />
-                              <Baseline
-                                axis={`macd-${test.symbol}`}
-                                value={0.0}
-                                position="right"
-                              />
-                            </Charts>
-                          </ChartRow>
-                          <ChartRow height="150">
-                            <YAxis
-                              id={`mad-${test.symbol}`}
-                              label={`MA Direction`}
-                              width="100"
-                              type="linear"
-                              format=".4f"
-                              min={this.state.MAD.min()}
-                              max={this.state.MAD.max()}
-                              showGrid
-                              labelOffset={-15}
-                              style={{
-                                ticks: {
-                                  stroke: "#aaa",
-                                  opacity: 0.25,
-                                  "stroke-dasharray": "1,1"
-                                }
-                              }}
-                            />
-                            <Charts>
-                              <LineChart
-                                axis={`mad-${test.symbol}`}
-                                series={this.state.MAD}
-                                style={this.state.styles.mad}
-                              />
-                              <Baseline
-                                axis={`mad-${test.symbol}`}
-                                value={0.0}
-                                position="right"
-                              />
-                            </Charts>
-                          </ChartRow>
-                          <ChartRow height="200">
-                            <YAxis
-                              id={`balance-${test.symbol}`}
-                              label="Balance history"
-                              width="100"
-                              type="linear"
-                              format=".2f"
-                              min={Math.min(
-                                this.state.baseBalanceHistory.min(),
-                                this.state.priceBalanceHistory.min()
-                              )}
-                              max={this.state.balanceHistory.max()}
-                              showGrid
-                              labelOffset={-15}
-                              style={{
-                                ticks: {
-                                  stroke: "#aaa",
-                                  opacity: 0.25,
-                                  "stroke-dasharray": "1,1"
-                                }
-                              }}
-                            />
-                            <Charts>
-                              <LineChart
-                                axis={`balance-${test.symbol}`}
-                                series={this.state.balanceHistory}
-                                style={this.state.styles.balance.summary}
-                              />
-                              <LineChart
-                                axis={`balance-${test.symbol}`}
-                                series={this.state.baseBalanceHistory}
-                                style={this.state.styles.balance.base}
-                              />
-                              <LineChart
-                                axis={`balance-${test.symbol}`}
-                                series={this.state.priceBalanceHistory}
-                                style={this.state.styles.balance.price}
-                              />
-                              <Baseline
-                                axis={`balance-${test.symbol}`}
-                                value={this.state.balanceHistory
-                                  .select("value")
-                                  .atFirst()
-                                  .value()}
-                                position="right"
-                              />
-                            </Charts>
-                          </ChartRow>
-                        </ChartContainer>
-                      </Resizable>
-                    )}
+                    <CandlesChart test={test} />
                     <h3>Сделки</h3>
                     <Table>
                       <thead>

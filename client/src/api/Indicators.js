@@ -71,3 +71,27 @@ export async function getMACD(valuesArray, params) {
       });
   });
 }
+
+export async function getChannel(candlesArray, params) {
+  return new Promise((resolve, reject) => {
+    fetch(`${API_ROOT}/indicators/channel`, {
+      method: "post",
+      headers: {
+        "Content-type": "application/json; charset=UTF-8"
+      },
+      body: JSON.stringify({
+        candlesArray,
+        params
+      })
+    })
+      .then(Response => {
+        return Response.json();
+      })
+      .then(channel => {
+        resolve(channel);
+      })
+      .catch(err => {
+        reject(err);
+      });
+  });
+}

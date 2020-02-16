@@ -13,7 +13,7 @@ class MADirectionStrategy {
     });
     const MADirection = Indicator.mad(valuesArray, {
       shift: 1,
-      period: 48
+      period: 5
     });
 
     MADirection.forEach((MADItem, index) => {
@@ -56,29 +56,20 @@ class MACDStrategy {
       signalPeriod: 9
     });
 
-    const MAD = Indicator.mad(valuesArray, {});
+    const channelIndicator = Indicator.channel(candlesData, { period: 7 });
+
+    const MAD = Indicator.mad(valuesArray, { period: 7 });
     MAD.forEach((MADItem, index) => {
       candlesData[index].MAD = MADItem.value;
     });
 
-    // const MA = Indicator.ma(valuesArray, {
-    //   period: 35
-    // });
-
-    // MA.forEach((MADItem, index) => {
-    //   candlesData[index].MA = MADItem.value;
-    // });
-
-    // const MAShort = Indicator.ma(valuesArray, {
-    //   period: 21
-    // });
-
-    // MAShort.forEach((MADItem, index) => {
-    //   candlesData[index].MAShort = MADItem.value;
-    // });
-
     MACD.bars.forEach((MACDBarItem, index) => {
       candlesData[index].MACDbar = MACDBarItem.value;
+    });
+
+    channelIndicator.forEach((ChannelItem, index) => {
+      candlesData[index].channelMiddle = ChannelItem.middle;
+      candlesData[index].channelRange = ChannelItem.range;
     });
 
     return candlesData;
@@ -86,6 +77,8 @@ class MACDStrategy {
 
   checkForSignal(indicatorData, currentIndicatorValue, index) {
     if (!index) return false;
+    if (currentIndicatorValue.channelRange < 5) return false;
+
     const currentMACDBarPositive = currentIndicatorValue.MACDbar > 0;
     const prevMACDBarPositive = indicatorData[index - 1].MACDbar > 0;
 
@@ -95,7 +88,11 @@ class MACDStrategy {
       currentIndicatorValue.MAD > 0
     ) {
       return {
-        type: "buy"
+        type: "buy",
+        stopLoss: currentIndicatorValue.low,
+        takeProfit:
+          (currentIndicatorValue.close - currentIndicatorValue.low) * 3 +
+          currentIndicatorValue.close
       };
     } else if (
       prevMACDBarPositive &&
@@ -103,7 +100,11 @@ class MACDStrategy {
       currentIndicatorValue.MAD < 0
     )
       return {
-        type: "sell"
+        type: "sell",
+        stopLoss: currentIndicatorValue.high,
+        takeProfit:
+          currentIndicatorValue.close -
+          (currentIndicatorValue.high - currentIndicatorValue.close) * 3
       };
     return false;
   }
@@ -128,8 +129,81 @@ class RandomStrategy {
   }
 }
 
+class ChannelStrategy {
+  getIndicators(candlesData, params) {
+    const channelIndicator = Indicator.channel(candlesData, { period: 7 });
+
+    return candlesData.map((candle, index) => {
+      return {
+        ...candle,
+        channelMax: channelIndicator[index].max,
+        channelMin: channelIndicator[index].min,
+        channelMiddle: channelIndicator[index].middle,
+        channelRange: channelIndicator[index].range
+      };
+    });
+  }
+
+  checkForSignal(indicatorData, currentIndicatorValue, index) {
+    if (!index) return false;
+    if (currentIndicatorValue.channelRange < 10) return false;
+    const currentChannelMiddlePositive =
+      currentIndicatorValue.close > currentIndicatorValue.channelMiddle;
+    const prevChannelMiddlePositive =
+      indicatorData[index - 1].close > indicatorData[index - 1].channelMiddle;
+
+    // const stopLoss =
+    //   (currentIndicatorValue.channelMax - currentIndicatorValue.channelMiddle) /
+    //   1;
+    const stopLoss =
+      currentIndicatorValue.close - currentIndicatorValue.channelMiddle;
+    if (!prevChannelMiddlePositive && currentChannelMiddlePositive) {
+      return {
+        type: "buy",
+        stopLoss: currentIndicatorValue.channelMiddle + stopLoss,
+        takeProfit: currentIndicatorValue.channelMiddle + stopLoss * 3
+      };
+    } else if (prevChannelMiddlePositive && !currentChannelMiddlePositive)
+      return {
+        type: "sell",
+        stopLoss: currentIndicatorValue.channelMiddle + stopLoss,
+        takeProfit: currentIndicatorValue.channelMiddle + stopLoss * 3
+      };
+    return false;
+  }
+}
+
+class CandlesStrategy {
+  getIndicators(candlesData, params) {
+    return candlesData;
+  }
+
+  checkForSignal(indicatorData, currentIndicatorValue, index) {
+    if (!index) return false;
+
+    const lastCandleIsPositive =
+      currentIndicatorValue.close > currentIndicatorValue.open;
+
+    if (lastCandleIsPositive) {
+      return {
+        type: "buy",
+        stopLoss: currentIndicatorValue.low,
+        takeProfit: currentIndicatorValue.close * 1.1
+      };
+    } else if (!lastCandleIsPositive)
+      return {
+        type: "sell",
+        stopLoss: currentIndicatorValue.high,
+        takeProfit: currentIndicatorValue.close * 0.9
+      };
+    return false;
+  }
+}
+
 module.exports = {
   madirection: new MADirectionStrategy(),
   macd: new MACDStrategy(),
-  random: new RandomStrategy()
+  random: new RandomStrategy(),
+  channel: new ChannelStrategy(),
+  candles: new CandlesStrategy()
 };

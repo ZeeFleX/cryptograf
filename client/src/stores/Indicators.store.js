@@ -1,5 +1,5 @@
 import { observable, action, computed } from "mobx";
-import { getMAD, getMA, getMACD } from "../api/Indicators";
+import { getMAD, getMA, getMACD, getChannel } from "../api/Indicators";
 import moment from "moment";
 
 class IndicatorsStore {
@@ -35,6 +35,15 @@ class IndicatorsStore {
     });
 
     return getMACDPromise;
+  }
+
+  @action async getChannel(candlesArray, params) {
+    const getChannelPromise = getChannel(candlesArray, params);
+    getChannelPromise.then(channel => {
+      this.channel = channel;
+    });
+
+    return getChannelPromise;
   }
 }
 

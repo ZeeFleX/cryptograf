@@ -147,6 +147,8 @@ class TestsPage extends Component {
                   <option value="macd">MACD</option>
                   <option value="madirection">Moving Average Direction</option>
                   <option value="random">Random</option>
+                  <option value="channel">Channel</option>
+                  <option value="candles">Candles</option>
                 </FormSelect>
               </FormGroup>
               <FormGroup>

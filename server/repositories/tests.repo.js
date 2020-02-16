@@ -17,13 +17,31 @@ module.exports = {
   },
   getTest: async ({ testId }) => {
     try {
-      const Test = db.Test.findOne({
+      const Test = await db.Test.findOne({
         where: {
-          id: testId
+          id: +testId
+        }
+      }).then(Response => Response.toJSON());
+
+      const TestStats = await db.TestStat.findAll({
+        where: {
+          testId: Test.id
         },
-        include: [db.Order, db.TestStat]
+        order: [["time", "asc"]]
       });
-      return Test;
+
+      const Orders = await db.Order.findAll({
+        where: {
+          testId: Test.id
+        },
+        order: [["id", "asc"]]
+      });
+
+      return {
+        ...Test,
+        Orders,
+        TestStats
+      };
     } catch (error) {
       console.error(error);
       return error;

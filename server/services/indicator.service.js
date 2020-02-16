@@ -93,6 +93,30 @@ class Indicator {
       bars: MACDBarsArray
     };
   }
+
+  channel(candlesArray, { period = 21 }) {
+    return candlesArray.map((candle, index) => {
+      if (index < period)
+        return {
+          time: candle.closeTime,
+          max: null,
+          min: null
+        };
+      const channelArray = candlesArray.slice(index - period, index);
+
+      const max = Math.max(...channelArray.map(item => item.high));
+      const min = Math.min(...channelArray.map(item => item.low));
+      const middle = (max + min) / 2;
+      const range = ((max - min) / candle.close) * 100;
+      return {
+        time: candle.closeTime,
+        max,
+        min,
+        middle,
+        range
+      };
+    });
+  }
 }
 
 module.exports = new Indicator();

@@ -32,5 +32,15 @@ module.exports.post = {
       console.log(err);
       res.json({ error: 1, message: err.toString() });
     }
+  },
+  channel: async (req, res, next) => {
+    try {
+      const { candlesArray, params } = req.body;
+      const channel = await IndicatorsRepo.getChannel(candlesArray, params);
+      res.json(channel);
+    } catch (err) {
+      console.log(err);
+      res.json({ error: 1, message: err.toString() });
+    }
   }
 };

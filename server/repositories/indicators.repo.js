@@ -25,5 +25,14 @@ module.exports = {
     } catch (err) {
       return err;
     }
+  },
+  getChannel: async (candlesArray, params) => {
+    try {
+      const channel = Indicator.channel(candlesArray, params);
+      return channel;
+    } catch (error) {
+      console.error(error);
+      return error;
+    }
   }
 };

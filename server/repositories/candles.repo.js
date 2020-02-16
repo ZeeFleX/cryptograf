@@ -19,7 +19,8 @@ module.exports = {
             [Op.gte]: startTime,
             [Op.lte]: endTime
           }
-        }
+        },
+        order: [["closeTime", "asc"]]
       })
         .then(candles => candles.map(candle => candle.toJSON()))
         .catch(err => {
@@ -31,7 +32,7 @@ module.exports = {
       return err;
     }
   },
-  sync: async (symbols = [], limit = 1000, period = "4h") => {
+  sync: async (symbols = [], limit = 1000, period = "1d") => {
     try {
       symbols.forEach(async symbol => {
         const lastCandle = await db.Candle.findOne({
