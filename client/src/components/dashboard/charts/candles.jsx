@@ -26,7 +26,6 @@ import {
   Annotate
 } from "react-stockcharts/lib/annotation";
 import moment from "moment";
-import { FaAutoprefixer } from "react-icons/fa";
 
 //Components
 
@@ -64,7 +63,8 @@ class CandlesChart extends Component {
     });
 
     let lastBalance = {};
-    const data = TimeSeries.candles.map((candle, index) => {
+
+    let data = TimeSeries.candles.map((candle, index) => {
       const testStat = testStatData.find(
         stat => stat.time === candle.closeTime
       );
@@ -151,7 +151,7 @@ class CandlesChart extends Component {
 
     const defaultAnnotationProps = {
       fontFamily: "Glyphicons Halflings",
-      fontSize: 20,
+      fontSize: 16,
       opacity: 0.8
     };
 
@@ -167,7 +167,7 @@ class CandlesChart extends Component {
       },
       sell: {
         ...defaultAnnotationProps,
-        fill: "green",
+        fill: "red",
         text: "\u25bc",
         y: ({ yScale, datum }) => {
           return yScale(datum.high) - 10;
@@ -179,7 +179,7 @@ class CandlesChart extends Component {
     const closeAnnotationProps = {
       buy: {
         ...defaultAnnotationProps,
-        fill: "red",
+        fill: "green",
         text: "\u25a0",
         y: ({ yScale, datum }) => {
           return yScale(datum.low) + 25;
@@ -227,7 +227,7 @@ class CandlesChart extends Component {
                 x={(width - margin.left - margin.right) / 2}
                 y={20}
                 fontSize="24"
-                text="BNBBTC"
+                text={this.props.test.symbol}
               />
               <Chart id={1} yExtents={d => [d.high, d.low]} height={400}>
                 <XAxis
@@ -249,12 +249,40 @@ class CandlesChart extends Component {
                   width={timeIntervalBarWidth(utcDay)}
                   widthRatio={0.7}
                 />
+                <MouseCoordinateX
+                  at="bottom"
+                  orient="bottom"
+                  displayFormat={timeFormat("%Y-%m-%d")}
+                />
                 <MouseCoordinateY
                   at="right"
                   orient="right"
-                  displayFormat={format(".2f")}
+                  displayFormat={format(".6f")}
                 />
-                <OHLCTooltip origin={[0, 0]} />
+                <SingleValueTooltip
+                  yLabel="Open"
+                  yAccessor={d => d.open}
+                  origin={[0, 0]}
+                  yDisplayFormat={format(".6f")}
+                />
+                <SingleValueTooltip
+                  yLabel="High"
+                  yAccessor={d => d.high}
+                  origin={[0, 15]}
+                  yDisplayFormat={format(".6f")}
+                />
+                <SingleValueTooltip
+                  yLabel="Low"
+                  yAccessor={d => d.low}
+                  origin={[0, 30]}
+                  yDisplayFormat={format(".6f")}
+                />
+                <SingleValueTooltip
+                  yLabel="Close"
+                  yAccessor={d => d.close}
+                  origin={[0, 45]}
+                  yDisplayFormat={format(".6f")}
+                />
                 <ZoomButtons onReset={this.handleReset.bind(this)} />
 
                 <Annotate

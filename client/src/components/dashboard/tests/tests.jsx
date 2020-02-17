@@ -45,15 +45,15 @@ class TestsPage extends Component {
     this.initialState = {
       showNewTestModal: false,
       formData: {
-        strategy: "macd",
-        symbol: "BNBBTC",
-        startTime: "2019-01-01",
+        strategy: "HACandles",
+        symbol: "BNBUSDT",
+        startTime: "2018-01-01",
         endTime: "2020-01-01",
         initialBaseBalance: 500,
         initialPriceBalance: 500,
-        stopLoss: 1,
+        stopLoss: 2,
         trailingStop: 50,
-        takeProfit: 5,
+        takeProfit: 80,
         riskAmount: 100
       }
     };
@@ -149,6 +149,7 @@ class TestsPage extends Component {
                   <option value="random">Random</option>
                   <option value="channel">Channel</option>
                   <option value="candles">Candles</option>
+                  <option value="HACandles">Heikin Ashi</option>
                 </FormSelect>
               </FormGroup>
               <FormGroup>

@@ -2,6 +2,7 @@ const Binance = require("../services/binance.service");
 const db = require("../models");
 const moment = require("moment");
 const Op = db.Sequelize.Op;
+const asyncForEach = require("../helpers/asyncForEach.helper");
 
 module.exports = {
   getCandles: async ({
@@ -34,7 +35,7 @@ module.exports = {
   },
   sync: async (symbols = [], limit = 1000, period = "1d") => {
     try {
-      symbols.forEach(async symbol => {
+      asyncForEach(symbols, async symbol => {
         const lastCandle = await db.Candle.findOne({
           where: {
             symbol

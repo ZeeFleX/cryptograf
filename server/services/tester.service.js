@@ -20,7 +20,7 @@ class Tester {
     MAPeriod = 21,
     MADShift = 5,
     trailingStop = 10,
-    margin = 3
+    margin = 1
   }) {
     const newTest = await db.Test.create({
       startTime,
@@ -67,12 +67,13 @@ class Tester {
     });
 
     await asyncForEach(indicatorData, async (timeSeriesCurrentValue, index) => {
-      const nextCandle = indicatorData[index + 1];
-      const signal = selectedStrategy.checkForSignal(
+      const signals = selectedStrategy.checkForSignal(
         indicatorData,
         timeSeriesCurrentValue,
         index
       );
+
+      console.log(signals);
 
       const openOrders = await db.Order.findAll({
         where: {
@@ -83,122 +84,95 @@ class Tester {
       });
 
       await asyncForEach(openOrders, async openOrder => {
-        if (
-          openOrder.type === "buy" &&
-          (timeSeriesCurrentValue.close < openOrder.stopLoss ||
-            timeSeriesCurrentValue.close > openOrder.takeProfit)
-        ) {
-          const currentBalance = await this.getCurrentBalance(
-            newTest.id,
-            "base"
-          );
-
-          const closedOrder = await this.closeOrder(
-            openOrder.id,
-            nextCandle.time,
-            nextCandle.open,
-            margin
-          );
-
-          await db.TestStat.create({
-            testId: closedOrder.testId,
-            time: closedOrder.closeTime,
-            baseBalance: currentBalance.base + closedOrder.profit,
-            priceBalance: currentBalance.price,
-            balance:
-              currentBalance.base + currentBalance.price + closedOrder.profit,
-            orderId: closedOrder.id
-          });
-        } else if (
-          openOrder.type === "sell" &&
-          (nextCandle.open > openOrder.stopLoss ||
-            nextCandle.open < openOrder.takeProfit)
-        ) {
-          const currentBalance = await this.getCurrentBalance(
-            newTest.id,
-            "price"
-          );
-
-          const closedOrder = await this.closeOrder(
-            openOrder.id,
-            nextCandle.time,
-            nextCandle.open,
-            margin
-          );
-
-          await db.TestStat.create({
-            testId: closedOrder.testId,
-            time: closedOrder.closeTime,
-            baseBalance: currentBalance.base,
-            priceBalance: currentBalance.price + closedOrder.profit,
-            balance:
-              currentBalance.base + currentBalance.price + closedOrder.profit,
-            orderId: closedOrder.id
-          });
-        } else {
-          this.updateTrailingStop(openOrder, trailingStop, nextCandle.open);
+        switch (openOrder.type) {
+          case "buy":
+            if (
+              timeSeriesCurrentValue.close < openOrder.stopLoss ||
+              timeSeriesCurrentValue.close > openOrder.takeProfit ||
+              signals.includes("closeBuy")
+            ) {
+              await this.closeOrder(
+                openOrder.id,
+                timeSeriesCurrentValue.time,
+                timeSeriesCurrentValue.close,
+                margin
+              );
+            }
+            break;
+          case "sell":
+            if (
+              timeSeriesCurrentValue.close > openOrder.stopLoss ||
+              timeSeriesCurrentValue.close < openOrder.takeProfit ||
+              signals.includes("closeSell")
+            ) {
+              await this.closeOrder(
+                openOrder.id,
+                timeSeriesCurrentValue.time,
+                timeSeriesCurrentValue.close,
+                margin
+              );
+            }
+            break;
         }
       });
 
-      if (signal) {
-        if (!openOrders.length) {
-          if (signal.type === "buy") {
-            const availableBalance = await this.getAvailableBalance(
-              newTest.id,
-              "base"
-            );
-            if (availableBalance > 0) {
-              await db.Order.create({
-                symbol,
-                openPrice: nextCandle.open,
-                amount: (availableBalance * riskAmount) / 100,
-                type: signal.type,
-                openTime: moment(nextCandle.time),
-                isTesting: true,
-                status: "open",
-                testId: newTest.id,
-                stopLoss:
-                  signal.stopLoss ||
-                  nextCandle.close -
-                    this.calculateDifference(nextCandle.close, stopLoss),
-                trailingStop:
-                  nextCandle.close -
-                  this.calculateDifference(nextCandle.close, trailingStop),
-                takeProfit:
-                  signal.takeProfit ||
-                  nextCandle.close +
-                    this.calculateDifference(nextCandle.close, takeProfit)
-              });
-            }
-          } else if (signal.type === "sell") {
-            const availableBalance = await this.getAvailableBalance(
-              newTest.id,
-              "price"
-            );
-            if (availableBalance > 0) {
-              await db.Order.create({
-                symbol,
-                openPrice: nextCandle.open,
-                amount: (availableBalance * riskAmount) / 100,
-                type: signal.type,
-                openTime: moment(nextCandle.time),
-                isTesting: true,
-                status: "open",
-                testId: newTest.id,
-                stopLoss:
-                  signal.stopLoss ||
-                  nextCandle.close +
-                    this.calculateDifference(nextCandle.close, stopLoss),
-                trailingStop:
-                  nextCandle.close +
-                  this.calculateDifference(nextCandle.close, trailingStop),
-                takeProfit:
-                  signal.takeProfit ||
-                  nextCandle.close -
-                    this.calculateDifference(nextCandle.close, takeProfit)
-              });
-            }
-          }
+      if (signals.includes("buy")) {
+        const availableBalance = await this.getAvailableBalance(
+          newTest.id,
+          "base"
+        );
+        if (availableBalance > 0) {
+          await db.Order.create({
+            symbol,
+            openPrice: timeSeriesCurrentValue.close,
+            amount: (availableBalance * riskAmount) / 100,
+            type: "buy",
+            openTime: moment(timeSeriesCurrentValue.time),
+            isTesting: true,
+            status: "open",
+            testId: newTest.id,
+            stopLoss:
+              timeSeriesCurrentValue.close -
+              this.calculateDifference(timeSeriesCurrentValue.close, stopLoss),
+            // trailingStop:
+            //   timeSeriesCurrentValue.close -
+            //   this.calculateDifference(
+            //     timeSeriesCurrentValue.close,
+            //     trailingStop
+            //   ),
+            takeProfit:
+              timeSeriesCurrentValue.close +
+              this.calculateDifference(timeSeriesCurrentValue.close, takeProfit)
+          });
+        }
+      } else if (signals.includes("sell")) {
+        const availableBalance = await this.getAvailableBalance(
+          newTest.id,
+          "price"
+        );
+        if (availableBalance > 0) {
+          await db.Order.create({
+            symbol,
+            openPrice: timeSeriesCurrentValue.close,
+            amount: (availableBalance * riskAmount) / 100,
+            type: "sell",
+            openTime: moment(timeSeriesCurrentValue.time),
+            isTesting: true,
+            status: "open",
+            testId: newTest.id,
+            stopLoss:
+              timeSeriesCurrentValue.close +
+              this.calculateDifference(timeSeriesCurrentValue.close, stopLoss),
+            // trailingStop:
+            //   timeSeriesCurrentValue.close +
+            //   this.calculateDifference(
+            //     timeSeriesCurrentValue.close,
+            //     trailingStop
+            //   ),
+            takeProfit:
+              timeSeriesCurrentValue.close -
+              this.calculateDifference(timeSeriesCurrentValue.close, takeProfit)
+          });
         }
       }
     });
@@ -262,6 +236,20 @@ class Tester {
           id: orderForClose.id
         }
       });
+
+      const currentBalance = await this.getCurrentBalance(
+        orderForClose.testId,
+        "base"
+      );
+      await db.TestStat.create({
+        testId: orderForClose.testId,
+        time: closeTime,
+        baseBalance: currentBalance.base + profit,
+        priceBalance: currentBalance.price,
+        balance: currentBalance.base + currentBalance.price + profit,
+        orderId: orderForClose.id
+      });
+
       return orderForClose;
     } else if (orderForClose.type === "sell") {
       const profit =
@@ -283,6 +271,20 @@ class Tester {
           id: orderForClose.id
         }
       });
+
+      const currentBalance = await this.getCurrentBalance(
+        orderForClose.testId,
+        "price"
+      );
+      await db.TestStat.create({
+        testId: orderForClose.testId,
+        time: closeTime,
+        baseBalance: currentBalance.base,
+        priceBalance: currentBalance.price + profit,
+        balance: currentBalance.base + currentBalance.price + profit,
+        orderId: orderForClose.id
+      });
+
       return orderForClose;
     }
   }

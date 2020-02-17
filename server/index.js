@@ -28,21 +28,21 @@ const WS = require("./services/ws.service").init(http);
 if (process.env.NODE_ENV === "development") app.use(cors());
 let swaggerFile = path.join(__dirname, "docs/openapi.yml");
 
-CandlesRepo.sync([
-  "BTCUSDT",
-  "BNBUSDT",
-  "ETHUSDT",
-  "ETHBTC",
-  "BNBBTC",
-  "BTCUSDT",
-  "ETHUSDT",
-  "BNBUSDT",
-  "ETCBNB",
-  "BNBETH",
-  "IOTABNB",
-  "LTCBNB",
-  "AIONBNB"
-]);
+// CandlesRepo.sync([
+//   "BTCUSDT",
+//   "BNBUSDT",
+//   "ETHUSDT",
+//   "ETHBTC",
+//   "BNBBTC",
+//   "BTCUSDT",
+//   "ETHUSDT",
+//   "BNBUSDT",
+//   "ETCBNB",
+//   "BNBETH",
+//   "IOTABNB",
+//   "LTCBNB",
+//   "AIONBNB"
+// ]);
 // setTimeout(() => {
 //   Binance.candlesSubscribe("ETHBTC");
 // }, 1000);
