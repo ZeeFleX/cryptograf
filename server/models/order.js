@@ -15,7 +15,9 @@ module.exports = (sequelize, DataTypes) => {
       trailingStop: DataTypes.FLOAT,
       stopLoss: DataTypes.FLOAT,
       takeProfit: DataTypes.FLOAT,
-      status: DataTypes.STRING
+      status: DataTypes.STRING,
+      baseFee: DataTypes.FLOAT,
+      priceFee: DataTypes.FLOAT
     },
     {}
   );

@@ -336,6 +336,7 @@ class TestDetailsPage extends Component {
                           <th>#</th>
                           <th>Пара</th>
                           <th>Объем</th>
+                          <th>Комиссия</th>
                           <th>Тип</th>
                           <th>Цена открытия</th>
                           <th>Цена закрытия</th>
@@ -354,6 +355,9 @@ class TestDetailsPage extends Component {
                             <td>{order.id}</td>
                             <td>{order.symbol}</td>
                             <td>{Math.round(order.amount)}</td>
+                            <td>{`${order.baseFee + order.priceFee} (${
+                              order.baseFee
+                            } / ${order.priceFee})`}</td>
                             <td>
                               {order.type === "buy" ? "Покупка" : "Продажа"}
                             </td>

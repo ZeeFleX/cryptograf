@@ -20,7 +20,8 @@ class Tester {
     MAPeriod = 21,
     MADShift = 5,
     trailingStop = 10,
-    margin = 1
+    margin = 1,
+    fee = 0.00075
   }) {
     const newTest = await db.Test.create({
       startTime,
@@ -73,8 +74,6 @@ class Tester {
         index
       );
 
-      console.log(signals);
-
       const openOrders = await db.Order.findAll({
         where: {
           symbol,
@@ -95,7 +94,8 @@ class Tester {
                 openOrder.id,
                 timeSeriesCurrentValue.time,
                 timeSeriesCurrentValue.close,
-                margin
+                margin,
+                fee
               );
             }
             break;
@@ -109,7 +109,8 @@ class Tester {
                 openOrder.id,
                 timeSeriesCurrentValue.time,
                 timeSeriesCurrentValue.close,
-                margin
+                margin,
+                fee
               );
             }
             break;
@@ -122,10 +123,11 @@ class Tester {
           "base"
         );
         if (availableBalance > 0) {
+          const amount = (availableBalance * riskAmount) / 100;
           await db.Order.create({
             symbol,
             openPrice: timeSeriesCurrentValue.close,
-            amount: (availableBalance * riskAmount) / 100,
+            amount,
             type: "buy",
             openTime: moment(timeSeriesCurrentValue.time),
             isTesting: true,
@@ -142,7 +144,11 @@ class Tester {
             //   ),
             takeProfit:
               timeSeriesCurrentValue.close +
-              this.calculateDifference(timeSeriesCurrentValue.close, takeProfit)
+              this.calculateDifference(
+                timeSeriesCurrentValue.close,
+                takeProfit
+              ),
+            baseFee: amount * fee
           });
         }
       } else if (signals.includes("sell")) {
@@ -151,10 +157,11 @@ class Tester {
           "price"
         );
         if (availableBalance > 0) {
+          const amount = (availableBalance * riskAmount) / 100;
           await db.Order.create({
             symbol,
             openPrice: timeSeriesCurrentValue.close,
-            amount: (availableBalance * riskAmount) / 100,
+            amount: amount - amount * fee,
             type: "sell",
             openTime: moment(timeSeriesCurrentValue.time),
             isTesting: true,
@@ -171,7 +178,11 @@ class Tester {
             //   ),
             takeProfit:
               timeSeriesCurrentValue.close -
-              this.calculateDifference(timeSeriesCurrentValue.close, takeProfit)
+              this.calculateDifference(
+                timeSeriesCurrentValue.close,
+                takeProfit
+              ),
+            priceFee: amount * fee
           });
         }
       }
@@ -209,7 +220,7 @@ class Tester {
     return testResults;
   }
 
-  async closeOrder(orderId, closeTime, closePrice, margin) {
+  async closeOrder(orderId, closeTime, closePrice, margin, fee) {
     let orderForClose = await db.Order.findOne({
       where: {
         id: orderId
@@ -224,12 +235,15 @@ class Tester {
           orderForClose.amount) *
         margin;
 
+      const priceFee = (orderForClose.amount + profit) * fee;
+
       orderForClose = {
         ...orderForClose,
         status: "closed",
         closeTime,
         closePrice,
-        profit
+        profit: profit - priceFee - orderForClose.baseFee,
+        priceFee
       };
       await db.Order.update(orderForClose, {
         where: {
@@ -244,9 +258,14 @@ class Tester {
       await db.TestStat.create({
         testId: orderForClose.testId,
         time: closeTime,
-        baseBalance: currentBalance.base + profit,
-        priceBalance: currentBalance.price,
-        balance: currentBalance.base + currentBalance.price + profit,
+        baseBalance: currentBalance.base + profit - orderForClose.baseFee,
+        priceBalance: currentBalance.price - priceFee,
+        balance:
+          currentBalance.base +
+          currentBalance.price +
+          profit -
+          orderForClose.baseFee -
+          priceFee,
         orderId: orderForClose.id
       });
 
@@ -259,12 +278,15 @@ class Tester {
           orderForClose.amount) *
         margin;
 
+      const baseFee = (orderForClose.amount + profit) * fee;
+
       orderForClose = {
         ...orderForClose,
         status: "closed",
         closeTime,
         closePrice,
-        profit
+        profit: profit - baseFee - orderForClose.priceFee,
+        baseFee
       };
       await db.Order.update(orderForClose, {
         where: {
@@ -279,9 +301,14 @@ class Tester {
       await db.TestStat.create({
         testId: orderForClose.testId,
         time: closeTime,
-        baseBalance: currentBalance.base,
-        priceBalance: currentBalance.price + profit,
-        balance: currentBalance.base + currentBalance.price + profit,
+        baseBalance: currentBalance.base - baseFee,
+        priceBalance: currentBalance.price + profit - orderForClose.priceFee,
+        balance:
+          currentBalance.base +
+          currentBalance.price +
+          profit -
+          baseFee -
+          orderForClose.priceFee,
         orderId: orderForClose.id
       });
 
