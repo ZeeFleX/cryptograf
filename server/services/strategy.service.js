@@ -207,7 +207,7 @@ class HACandlesStrategy {
           value: candle.close
         };
       }),
-      { period: 21 }
+      { period: 48 }
     );
     MAD.forEach((MADItem, index) => {
       candles[index].MAD = MADItem.value;

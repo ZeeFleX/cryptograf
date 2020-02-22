@@ -20,7 +20,7 @@ class Tester {
     MAPeriod = 21,
     MADShift = 5,
     trailingStop = 10,
-    margin = 1,
+    margin = 2,
     fee = 0.00075
   }) {
     const newTest = await db.Test.create({
@@ -148,7 +148,7 @@ class Tester {
                 timeSeriesCurrentValue.close,
                 takeProfit
               ),
-            baseFee: amount * fee
+            baseFee: amount * fee * margin
           });
         }
       } else if (signals.includes("sell")) {
@@ -182,7 +182,7 @@ class Tester {
                 timeSeriesCurrentValue.close,
                 takeProfit
               ),
-            priceFee: amount * fee
+            priceFee: amount * fee * margin
           });
         }
       }
@@ -235,7 +235,7 @@ class Tester {
           orderForClose.amount) *
         margin;
 
-      const priceFee = (orderForClose.amount + profit) * fee;
+      const priceFee = (orderForClose.amount + profit) * fee * margin;
 
       orderForClose = {
         ...orderForClose,
@@ -258,8 +258,9 @@ class Tester {
       await db.TestStat.create({
         testId: orderForClose.testId,
         time: closeTime,
-        baseBalance: currentBalance.base + profit - orderForClose.baseFee,
-        priceBalance: currentBalance.price - priceFee,
+        baseBalance:
+          currentBalance.base + profit - orderForClose.baseFee - priceFee,
+        priceBalance: currentBalance.price,
         balance:
           currentBalance.base +
           currentBalance.price +
@@ -278,7 +279,7 @@ class Tester {
           orderForClose.amount) *
         margin;
 
-      const baseFee = (orderForClose.amount + profit) * fee;
+      const baseFee = (orderForClose.amount + profit) * fee * margin;
 
       orderForClose = {
         ...orderForClose,
@@ -301,8 +302,9 @@ class Tester {
       await db.TestStat.create({
         testId: orderForClose.testId,
         time: closeTime,
-        baseBalance: currentBalance.base - baseFee,
-        priceBalance: currentBalance.price + profit - orderForClose.priceFee,
+        baseBalance: currentBalance.base,
+        priceBalance:
+          currentBalance.price + profit - baseFee - orderForClose.priceFee,
         balance:
           currentBalance.base +
           currentBalance.price +
